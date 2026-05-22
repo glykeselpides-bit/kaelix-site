@@ -119,6 +119,61 @@ export default function Home() {
           </div>
         </section>
         
+        <section
+          id="preview"
+          className="mx-auto max-w-7xl px-6 py-24"
+        >
+          <div className="mb-14 text-center">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
+              Product Preview
+            </p>
+
+            <h2 className="text-3xl font-bold md:text-5xl">
+              See Kaelix in action.
+            </h2>
+
+            <p className="mx-auto mt-5 max-w-2xl text-slate-400">
+              Built directly inside Discord with a premium native experience.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2">
+
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
+              <img
+                src="/preview-onboarding.jpeg"
+                alt="Onboarding"
+                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
+              />
+            </div>
+
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
+              <img
+                src="/preview-admin-hub.jpeg"
+                alt="Admin Hub"
+                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
+              />
+            </div>
+
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
+              <img
+                src="/preview-activity-hub.jpeg"
+                alt="Activities"
+                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
+              />
+            </div>
+
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
+              <img
+                src="/preview-analytics.jpeg"
+                alt="Analytics"
+                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
+              />
+            </div>
+
+          </div>
+        </section>
+
         <section id="pricing" className="mx-auto max-w-5xl px-6 py-24 text-center">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
             Pricing
