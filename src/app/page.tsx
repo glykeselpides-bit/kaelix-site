@@ -41,6 +41,7 @@ export default function Home() {
                 ☰
               </button>
             </div>
+          </div>
         </nav>
 
         <section className="flex min-h-screen flex-col items-center justify-center px-6 pt-24 text-center">
