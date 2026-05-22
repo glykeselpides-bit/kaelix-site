@@ -69,7 +69,7 @@ export default function Home() {
             </a>
 
             <a
-              href="https://discord.gg/278FuNrmfe"
+              href="https://discord.gg/2PYbjwmHRX"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-2xl border border-white/20 bg-black/30 px-8 py-4 text-lg font-semibold backdrop-blur transition hover:border-blue-400 hover:text-blue-300"
@@ -209,7 +209,7 @@ export default function Home() {
               </a>
 
               <a
-                href="https://discord.gg/278FuNrmfe"
+                href="https://discord.gg/2PYbjwmHRX"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-2xl border border-white/20 bg-black/30 px-8 py-4 text-lg font-semibold backdrop-blur transition hover:border-blue-400 hover:text-blue-300"
