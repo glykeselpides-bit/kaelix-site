@@ -6,7 +6,7 @@ export default function Home() {
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
       <div className="min-h-screen bg-black/25">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/35 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
             <div className="flex items-center gap-3">
               <img src="/kx_Logo.png" alt="Kaelix Logo" className="h-10 w-10 object-contain" />
               <span className="text-base font-semibold uppercase tracking-[0.35em] text-slate-200">
@@ -14,7 +14,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+            <div className="hidden items-center gap-8 text-sm text-slate-300 lg:flex">
               <a className="transition hover:text-white" href="#features">Features</a>
               <a className="transition hover:text-white" href="#preview">Preview</a>
               <a className="transition hover:text-white" href="#pricing">Pricing</a>
@@ -25,7 +25,7 @@ export default function Home() {
               href={inviteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 md:block"
+              className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 lg:block"
             >
               Add to Discord
             </a>
@@ -43,7 +43,7 @@ export default function Home() {
             KAELIX
           </p>
 
-          <h1 className="max-w-4xl text-3xl font-bold leading-tight md:text-5xl">
+          <h1 className="max-w-4xl text-2xl font-bold leading-tight sm:text-3xl md:text-5xl">
             The Operating System
             <span className="block text-slate-200">for Modern Communities</span>
           </h1>
@@ -58,7 +58,7 @@ export default function Home() {
             Built for <span className="text-blue-400">Discord</span> communities.
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href={inviteUrl}
               target="_blank"
@@ -84,7 +84,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
             {[
               ["Events", "Create, register, attend, remind, and track community events."],
               ["Factions", "Sort members into factions with onboarding and role flows."],
@@ -141,7 +141,7 @@ export default function Home() {
             {[
               ["/preview-onboarding.jpeg", "Kaelix Onboarding"],
               ["/preview-admin-hub.jpeg", "Kaelix Admin Hub"],
-              ["/preview-activity-hub.jpeg", "Kaelix Activity Hub"],
+              ["/preview-activity-categories.jpeg", "Kaelix Activities"],
               ["/preview-analytics.jpeg", "Kaelix Analytics"],
             ].map(([src, alt]) => (
               <div
@@ -151,7 +151,7 @@ export default function Home() {
                 <img
                   src={src}
                   alt={alt}
-                  className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
+                  className="h-[240px] w-full object-cover object-top transition duration-500 hover:scale-[1.03] sm:h-[320px] md:h-[420px]"
                 />
               </div>
             ))}
@@ -177,9 +177,41 @@ export default function Home() {
           </div>
         </section>
 
-        <footer className="border-t border-white/10 bg-black/40 px-6 py-10 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
-            <div className="flex items-center gap-3">
+        <section className="mx-auto max-w-5xl px-6 py-28 text-center">
+          <div className="rounded-3xl border border-blue-400/20 bg-black/40 p-12 backdrop-blur-xl">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
+              Ready To Launch
+            </p>
+
+            <h2 className="text-2xl font-bold md:text-4xl">
+              Build a better community.
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300">
+              Kaelix gives modern Discord communities structured systems,
+              automation, onboarding, analytics, activities, and progression —
+              all in one platform.
+            </p>
+
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <a
+                href="https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:scale-[1.03] hover:bg-blue-500"
+              >
+                Add to Discord
+              </a>
+
+              <button className="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-lg font-semibold text-white transition hover:border-blue-400/40 hover:bg-white/10">
+                Join Waitlist
+              </button>
+            </div>
+          </div>
+        </section>
+        <footer className="border-t border-white/10 bg-black/40 px-6 py-8 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 text-left">
+            <div className="flex items-center gap-4">
               <img
                 src="/kx_Logo.png"
                 alt="Kaelix Logo"
@@ -197,17 +229,12 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex gap-6 text-sm text-slate-400">
-              <a href="#features" className="transition hover:text-white">
-                Features
-              </a>
-
-              <a href="#preview" className="transition hover:text-white">
-                Preview
-              </a>
-
-              <a href="#pricing" className="transition hover:text-white">
-                Pricing
+            <div className="text-sm text-slate-400">
+              <a
+                href="mailto:hello@joinkaelix.com"
+                className="rounded-full border border-white/10 px-5 py-2 transition hover:border-blue-400/40 hover:text-white"
+              >
+                Contact
               </a>
             </div>
           </div>
