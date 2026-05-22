@@ -1,4 +1,7 @@
 export default function Home() {
+  const inviteUrl =
+    "https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands";
+
   return (
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
       <div className="min-h-screen bg-black/25">
@@ -13,13 +16,13 @@ export default function Home() {
 
             <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
               <a className="transition hover:text-white" href="#features">Features</a>
+              <a className="transition hover:text-white" href="#preview">Preview</a>
               <a className="transition hover:text-white" href="#pricing">Pricing</a>
               <a className="transition hover:text-white" href="#docs">Docs</a>
-              <a className="transition hover:text-white" href="#login">Login</a>
             </div>
 
             <a
-              href="https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands"
+              href={inviteUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 md:block"
@@ -33,7 +36,7 @@ export default function Home() {
           <img
             src="/kx_Logo.png"
             alt="Kaelix Logo"
-            className="mb-8 h-30 w-30 object-contain"
+            className="mb-8 h-24 w-24 object-contain"
           />
 
           <p className="mb-6 text-base font-semibold uppercase tracking-[0.25em] text-slate-200">
@@ -57,10 +60,10 @@ export default function Home() {
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <a
-              href="https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands"
+              href={inviteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 md:block"
+              className="rounded-2xl border border-blue-400/60 bg-blue-950/80 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_30px_rgba(37,99,235,0.35)] transition hover:bg-blue-900"
             >
               Add to Discord
             </a>
@@ -118,11 +121,8 @@ export default function Home() {
             ))}
           </div>
         </section>
-        
-        <section
-          id="preview"
-          className="mx-auto max-w-7xl px-6 py-24"
-        >
+
+        <section id="preview" className="mx-auto max-w-7xl px-6 py-24">
           <div className="mb-14 text-center">
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
               Product Preview
@@ -138,39 +138,23 @@ export default function Home() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2">
-
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
-              <img
-                src="/preview-onboarding.jpeg"
-                alt="Onboarding"
-                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
-              />
-            </div>
-
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
-              <img
-                src="/preview-admin-hub.jpeg"
-                alt="Admin Hub"
-                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
-              />
-            </div>
-
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
-              <img
-                src="/preview-activity-hub.jpeg"
-                alt="Activities"
-                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
-              />
-            </div>
-
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/35 backdrop-blur-xl">
-              <img
-                src="/preview-analytics.jpeg"
-                alt="Analytics"
-                className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
-              />
-            </div>
-
+            {[
+              ["/preview-onboarding.jpeg", "Kaelix Onboarding"],
+              ["/preview-admin-hub.jpeg", "Kaelix Admin Hub"],
+              ["/preview-activity-hub.jpeg", "Kaelix Activity Hub"],
+              ["/preview-analytics.jpeg", "Kaelix Analytics"],
+            ].map(([src, alt]) => (
+              <div
+                key={src}
+                className="overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl transition hover:border-blue-400/30"
+              >
+                <img
+                  src={src}
+                  alt={alt}
+                  className="h-[420px] w-full object-cover object-top transition duration-500 hover:scale-[1.03]"
+                />
+              </div>
+            ))}
           </div>
         </section>
 
@@ -178,7 +162,7 @@ export default function Home() {
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
             Pricing
           </p>
-          <h2 className="text-2xl font-bold md:text-3xl">
+          <h2 className="text-4xl font-bold md:text-5xl">
             Start free. Scale when ready.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-slate-400">
@@ -192,9 +176,9 @@ export default function Home() {
             </p>
           </div>
         </section>
+
         <footer className="border-t border-white/10 bg-black/40 px-6 py-10 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
-            
             <div className="flex items-center gap-3">
               <img
                 src="/kx_Logo.png"
@@ -214,16 +198,16 @@ export default function Home() {
             </div>
 
             <div className="flex gap-6 text-sm text-slate-400">
-              <a href="#" className="transition hover:text-white">
+              <a href="#features" className="transition hover:text-white">
                 Features
               </a>
 
-              <a href="#" className="transition hover:text-white">
-                Pricing
+              <a href="#preview" className="transition hover:text-white">
+                Preview
               </a>
 
-              <a href="#" className="transition hover:text-white">
-                Docs
+              <a href="#pricing" className="transition hover:text-white">
+                Pricing
               </a>
             </div>
           </div>
