@@ -7,12 +7,16 @@ export default function Home() {
       <div className="min-h-screen bg-black/25">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/35 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-            <div className="flex items-center gap-3">
+            <a
+              href="#"
+              className="flex items-center gap-3 transition hover:opacity-80"
+            >
               <img src="/kx_Logo.png" alt="Kaelix Logo" className="h-10 w-10 object-contain" />
+
               <span className="text-base font-semibold uppercase tracking-[0.35em] text-slate-200">
                 Kaelix
               </span>
-            </div>
+            </a>
 
             <div className="hidden items-center gap-8 text-sm text-slate-300 lg:flex">
               <a className="transition hover:text-white" href="#features">Features</a>
