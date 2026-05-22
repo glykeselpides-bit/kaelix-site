@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 export default function CommandsPage() {
   const categories = [
     {
@@ -143,14 +144,11 @@ export default function CommandsPage() {
 
   return (
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
-      <div className="min-h-screen bg-black/70 px-6 py-24">
+        <Navbar />
+
+        <div className="min-h-screen bg-black/70 px-6 py-32">
         <div className="mx-auto max-w-7xl">
-            <a href="/" className="mb-12 inline-flex items-center gap-3 transition hover:opacity-80">
-                <img src="/kx_Logo.png" alt="Kaelix" className="h-8 w-8 object-contain" />
-                <span className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
-                    Kaelix
-                </span>
-            </a>
+            
           <div className="mb-20 text-center">
             <p className="mb-4 text-sm font-semibold uppercase tracking-[0.45em] text-blue-300">
               Kaelix Systems
