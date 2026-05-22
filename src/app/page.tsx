@@ -35,11 +35,34 @@ export default function Home() {
                 Add to Discord
               </a>
 
-              <button
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl text-slate-200 transition hover:border-blue-400/40 hover:bg-blue-500/10 hover:text-white"
-              >
-                ☰
-              </button>
+              <details className="relative">
+                <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl text-slate-200 transition hover:border-blue-400/40 hover:bg-blue-500/10 hover:text-white">
+                  ☰
+                </summary>
+
+                <div className="absolute right-0 top-14 w-56 overflow-hidden rounded-2xl border border-white/10 bg-black/90 shadow-2xl backdrop-blur-xl">
+                  <a href="#features" className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white">
+                    Features
+                  </a>
+                  <a href="#preview" className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white">
+                    Preview
+                  </a>
+                  <a href="#pricing" className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white">
+                    Pricing
+                  </a>
+                  <a href="/commands" className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white">
+                    Commands
+                  </a>
+                  <a
+                    href="https://discord.gg/278FuNrmfe"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-5 py-4 text-sm text-blue-300 hover:bg-blue-500/10 hover:text-blue-200"
+                  >
+                    Join Community
+                  </a>
+                </div>
+              </details>
             </div>
           </div>
         </nav>
