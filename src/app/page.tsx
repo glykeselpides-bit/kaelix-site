@@ -54,7 +54,7 @@ export default function Home() {
                     Commands
                   </a>
                   <a
-                    href="https://discord.gg/278FuNrmfe"
+                    href="https://discord.gg/2PYbjwmHRX"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block px-5 py-4 text-sm text-blue-300 hover:bg-blue-500/10 hover:text-blue-200"

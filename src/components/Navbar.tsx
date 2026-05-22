@@ -17,7 +17,7 @@ export default function Navbar() {
 
         <div className="relative flex items-center gap-4">
           <a
-            href="https://discord.gg/278FuNrmfe"
+            href="https://discord.gg/2PYbjwmHRX"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 md:block"
