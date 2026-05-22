@@ -18,7 +18,7 @@ export default function Home() {
               <a className="transition hover:text-white" href="#features">Features</a>
               <a className="transition hover:text-white" href="#preview">Preview</a>
               <a className="transition hover:text-white" href="#pricing">Pricing</a>
-              <a className="transition hover:text-white" href="#docs">Docs</a>
+              <a className="transition hover:text-white" href="/commands">Commands</a>
             </div>
 
             <a
@@ -68,9 +68,14 @@ export default function Home() {
               Add to Discord
             </a>
 
-            <button className="rounded-2xl border border-white/20 bg-black/30 px-8 py-4 text-lg font-semibold backdrop-blur transition hover:border-blue-400 hover:text-blue-300">
-              Join Waitlist
-            </button>
+            <a
+              href="https://discord.gg/278FuNrmfe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-2xl border border-white/20 bg-black/30 px-8 py-4 text-lg font-semibold backdrop-blur transition hover:border-blue-400 hover:text-blue-300"
+            >
+              Join Community
+            </a>
           </div>
         </section>
 
@@ -203,9 +208,14 @@ export default function Home() {
                 Add to Discord
               </a>
 
-              <button className="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-lg font-semibold text-white transition hover:border-blue-400/40 hover:bg-white/10">
-                Join Waitlist
-              </button>
+              <a
+                href="https://discord.gg/278FuNrmfe"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl border border-white/20 bg-black/30 px-8 py-4 text-lg font-semibold backdrop-blur transition hover:border-blue-400 hover:text-blue-300"
+              >
+                Join Community
+              </a>
             </div>
           </div>
         </section>
