@@ -18,9 +18,14 @@ export default function Home() {
               <a className="transition hover:text-white" href="#login">Login</a>
             </div>
 
-            <button className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold shadow-[0_0_20px_rgba(37,99,235,0.25)] transition hover:bg-blue-900 md:block">
+            <a
+              href="https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 md:block"
+            >
               Add to Discord
-            </button>
+            </a>
           </div>
         </nav>
 
@@ -51,9 +56,14 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <button className="rounded-2xl border border-blue-400/60 bg-blue-950/80 px-8 py-4 text-lg font-semibold shadow-[0_0_30px_rgba(37,99,235,0.35)] transition hover:bg-blue-900">
+            <a
+              href="https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 md:block"
+            >
               Add to Discord
-            </button>
+            </a>
 
             <button className="rounded-2xl border border-white/20 bg-black/30 px-8 py-4 text-lg font-semibold backdrop-blur transition hover:border-blue-400 hover:text-blue-300">
               Join Waitlist
@@ -138,7 +148,7 @@ export default function Home() {
               />
 
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-200">
                   Kaelix
                 </p>
 
