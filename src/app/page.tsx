@@ -5,8 +5,8 @@ export default function Home() {
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/35 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <div className="flex items-center gap-3">
-              <img src="/kx_Logo.png" alt="Kaelix Logo" className="h-9 w-9 object-contain" />
-              <span className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
+              <img src="/kx_Logo.png" alt="Kaelix Logo" className="h-10 w-10 object-contain" />
+              <span className="text-base font-semibold uppercase tracking-[0.35em] text-slate-200">
                 Kaelix
               </span>
             </div>
@@ -28,14 +28,14 @@ export default function Home() {
           <img
             src="/kx_Logo.png"
             alt="Kaelix Logo"
-            className="mb-8 h-20 w-20 object-contain"
+            className="mb-8 h-30 w-30 object-contain"
           />
 
-          <p className="mb-6 text-sm font-semibold uppercase tracking-[0.7em] text-slate-300">
+          <p className="mb-6 text-base font-semibold uppercase tracking-[0.25em] text-slate-200">
             KAELIX
           </p>
 
-          <h1 className="max-w-4xl text-5xl font-bold leading-tight md:text-7xl">
+          <h1 className="max-w-4xl text-3xl font-bold leading-tight md:text-5xl">
             The Operating System
             <span className="block text-slate-200">for Modern Communities</span>
           </h1>
@@ -66,7 +66,7 @@ export default function Home() {
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
               Features
             </p>
-            <h2 className="text-4xl font-bold md:text-5xl">
+            <h2 className="text-3xl font-bold md:text-4xl">
               Built to manage serious communities.
             </h2>
           </div>
@@ -113,7 +113,7 @@ export default function Home() {
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
             Pricing
           </p>
-          <h2 className="text-4xl font-bold md:text-5xl">
+          <h2 className="text-2xl font-bold md:text-3xl">
             Start free. Scale when ready.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-slate-400">
