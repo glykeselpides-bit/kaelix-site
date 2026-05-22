@@ -144,7 +144,7 @@ export default function Home() {
 
           <div className="grid gap-8 md:grid-cols-2">
             {[
-              ["/preview-onboarding.jpeg", "Kaelix Onboarding"],
+              ["/preview-onboarding.png", "Kaelix Onboarding"],
               ["/preview-admin-hub.jpeg", "Kaelix Admin Hub"],
               ["/preview-activity-categories.jpeg", "Kaelix Activities"],
               ["/preview-analytics.jpeg", "Kaelix Analytics"],
