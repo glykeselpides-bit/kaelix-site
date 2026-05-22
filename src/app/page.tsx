@@ -25,15 +25,22 @@ export default function Home() {
               <a className="transition hover:text-white" href="/commands">Commands</a>
             </div>
 
-            <a
-              href={inviteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 lg:block"
-            >
-              Add to Discord
-            </a>
-          </div>
+            <div className="flex items-center gap-4">
+              <a
+                href={inviteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden rounded-xl border border-blue-400/50 bg-blue-950/70 px-4 py-2 text-sm font-semibold text-white transition hover:border-blue-300 hover:bg-blue-900/80 md:block"
+              >
+                Add to Discord
+              </a>
+
+              <button
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl text-slate-200 transition hover:border-blue-400/40 hover:bg-blue-500/10 hover:text-white"
+              >
+                ☰
+              </button>
+            </div>
         </nav>
 
         <section className="flex min-h-screen flex-col items-center justify-center px-6 pt-24 text-center">
