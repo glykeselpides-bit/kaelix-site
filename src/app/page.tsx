@@ -213,11 +213,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="rounded-[28px] border border-blue-400/40 bg-blue-500/10 p-8 shadow-[0_0_30px_rgba(59,130,246,0.12)] backdrop-blur-xl transition hover:-translate-y-2">
-              <div className="mb-4 inline-flex rounded-full border border-blue-400/40 bg-blue-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
-                Most Popular
-              </div>
-
+            <div className="rounded-[28px] border border-white/10 bg-black/50 p-8 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/40">
               <h3 className="text-3xl font-bold text-white">
                 Core
               </h3>
@@ -233,7 +229,11 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="rounded-[28px] border border-white/10 bg-black/50 p-8 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/40">
+            <div className="rounded-[28px] border border-blue-400/40 bg-blue-500/10 p-8 shadow-[0_0_30px_rgba(59,130,246,0.12)] backdrop-blur-xl transition hover:-translate-y-2">
+              <div className="mb-3 inline-flex rounded-full border border-blue-400/40 bg-blue-500/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-200">
+                Most Popular
+              </div>
+
               <h3 className="text-3xl font-bold text-white">
                 Pro
               </h3>

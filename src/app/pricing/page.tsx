@@ -104,7 +104,7 @@ export default function PricingPage() {
                 }`}
               >
                 {plan.highlight && (
-                  <div className="absolute right-6 top-6 rounded-full border border-blue-400/40 bg-blue-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                  <div className="absolute right-6 top-5 rounded-full border border-blue-400/40 bg-blue-500/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-200">
                     Most Popular
                   </div>
                 )}
