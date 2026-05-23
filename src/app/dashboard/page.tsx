@@ -17,17 +17,18 @@ export default function DocsPage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            Kaelix documentation, setup guides, integrations,
-            onboarding tutorials, and command references will live here.
+            Log in with Discord to manage your servers, configure Kaelix,
+            access analytics, activities, factions, automation systems,
+            and future dashboard tools.
           </p>
 
           <a
-            href="https://discord.gg/2PYbjwmHRX"
+            href="/login"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-10 rounded-2xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:scale-[1.03] hover:bg-blue-500"
           >
-            Join Community
+            Log in with Discord
           </a>
         </section>
       </div>
