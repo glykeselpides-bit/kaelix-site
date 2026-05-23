@@ -1,3 +1,5 @@
+import Footer from "@/components/Footer";
+
 export default function Home() {
   const inviteUrl =
     "https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands";
