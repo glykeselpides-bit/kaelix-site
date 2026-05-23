@@ -256,7 +256,7 @@ export default function Home() {
               READY TO LAUNCH
             </p>
 
-            <h2 className="mt-5 text-4xl font-bold text-white md:text-6xl">
+            <h2 className="mt-5 text-3xl font-bold text-white md:text-5xl">
               Build a better community.
             </h2>
 
