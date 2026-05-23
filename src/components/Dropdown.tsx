@@ -10,6 +10,7 @@ const items = [
   { label: "Docs", href: "/docs" },
   { label: "Dashboard", href: "/dashboard" },
   { label: "Status", href: "/status" },
+  { label: "Log in", href: "/login" },
   { label: "Community", href: "/community" },
 ];
 

@@ -8,7 +8,6 @@ import Footer from "@/components/Footer";
 const plans = [
   { id: "core", name: "Core", price: 4.99 },
   { id: "pro", name: "Pro", price: 18.99 },
-  { id: "elite", name: "Elite", price: 48.99 },
 ];
 
 const addOns = [
