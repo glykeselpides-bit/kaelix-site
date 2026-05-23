@@ -249,18 +249,18 @@ export default function Home() {
 
         <section
           id="community"
-          className="mx-auto max-w-6xl px-6 py-24"
+          className="mx-auto max-w-5xl px-6 py-12"
         >
-          <div className="rounded-3xl border border-blue-400/20 bg-black/40 p-12 backdrop-blur-xl">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
-              Ready To Launch
+          <div className="rounded-[32px] border border-blue-500/20 bg-black/70 px-8 py-14 text-center backdrop-blur-xl md:px-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.45em] text-blue-300">
+              READY TO LAUNCH
             </p>
 
-            <h2 className="text-2xl font-bold md:text-4xl">
+            <h2 className="mt-5 text-4xl font-bold text-white md:text-6xl">
               Build a better community.
             </h2>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300">
+            <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
               Kaelix gives modern Discord communities structured systems,
               automation, onboarding, analytics, activities, and progression —
               all in one platform.
@@ -280,7 +280,7 @@ export default function Home() {
                 href="https://discord.gg/2PYbjwmHRX"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-2xl border border-white/20 bg-black/30 px-8 py-4 text-lg font-semibold backdrop-blur transition hover:border-blue-400 hover:text-blue-300"
+                className="rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-lg font-semibold text-white transition hover:border-blue-400 hover:bg-blue-500/10"
               >
                 Join Community
               </a>
