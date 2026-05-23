@@ -14,7 +14,7 @@ const plans = [
       "Server notifications only",
     ],
     activities: "Riddle, Would You Rather, True or False",
-    button: "Start Free",
+    button: "Add to Discord",
     highlight: false,
   },
   {
@@ -148,7 +148,9 @@ export default function PricingPage() {
                   href={
                     plan.name === "Elite"
                       ? "mailto:hello@joinkaelix.com"
-                      : `/checkout?plan=${plan.name.toLowerCase()}`
+                      : plan.name === "Free"
+                        ? "https://discord.gg/2PYbjwmHRX"
+                        : `/checkout?plan=${plan.name.toLowerCase()}`
                   }
                   className={`mt-auto rounded-2xl px-6 py-4 text-center text-sm font-semibold transition ${
                     plan.highlight
