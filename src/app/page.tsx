@@ -1,4 +1,5 @@
 import Footer from "@/components/Footer";
+import Dropdown from "@/components/Dropdown";
 
 export default function Home() {
   const inviteUrl =
@@ -42,51 +43,7 @@ export default function Home() {
                   ☰
                 </summary>
 
-                <div className="absolute right-0 top-14 w-56 overflow-hidden rounded-2xl border border-white/10 bg-black/90 shadow-2xl backdrop-blur-xl">
-                  <a
-                    href="/commands"
-                    className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
-                  >
-                    Commands
-                  </a>
-
-                  <a
-                    href="/pricing"
-                    className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
-                  >
-                    Pricing
-                  </a>
-
-                  <a
-                    href="/docs"
-                    className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
-                  >
-                    Docs
-                  </a>
-
-                  <a
-                    href="/dashboard"
-                    className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
-                  >
-                    Dashboard
-                  </a>
-
-                  <a
-                    href="/status"
-                    className="block px-5 py-4 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
-                  >
-                    Status
-                  </a>
-
-                  <a
-                    href="https://discord.gg/2PYbjwmHRX"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block px-5 py-4 text-sm text-blue-300 hover:bg-blue-500/10 hover:text-blue-200"
-                  >
-                    Community
-                  </a>
-                </div>
+                <Dropdown />
               </details>
             </div>
           </div>
