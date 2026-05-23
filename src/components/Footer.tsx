@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-black/60">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8 md:flex-row md:items-center md:justify-between">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-3 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <img
@@ -15,7 +15,7 @@ export default function Footer() {
             </span>
           </div>
 
-          <p className="mt-3 max-w-md text-sm leading-7 text-slate-400">
+          <p className="mt-2 max-w-sm text-[10px] leading-6 text-slate-400">
             Premium Discord community infrastructure focused on engagement,
             progression, onboarding, automation, and activities.
           </p>
@@ -23,7 +23,7 @@ export default function Footer() {
 
         <div className="text-sm text-slate-400">
           <a
-            href="mailto:contact@joinkaelix.com"
+            href="mailto:hello@joinkaelix.com"
             className="transition hover:text-white"
           >
             Contact
@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/5 py-5 text-center text-xs tracking-[0.25em] text-slate-500">
+      <div className="border-t border-white/5 py-5 text-center text-[10px] tracking-[0.25em] text-slate-500">
         © 2026 Kaelix
       </div>
     </footer>
