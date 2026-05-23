@@ -134,7 +134,7 @@ export default function PricingPage() {
                   </ul>
                 </div>
 
-                <div className="mt-8 rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-300">
                     Activities
                   </p>
@@ -144,15 +144,20 @@ export default function PricingPage() {
                   </p>
                 </div>
 
-                <button
-                  className={`mt-auto rounded-2xl px-6 py-4 text-sm font-semibold transition ${
+                <a
+                  href={
+                    plan.name === "Elite"
+                      ? "mailto:hello@joinkaelix.com"
+                      : `/checkout?plan=${plan.name.toLowerCase()}`
+                  }
+                  className={`mt-auto rounded-2xl px-6 py-4 text-center text-sm font-semibold transition ${
                     plan.highlight
                       ? "bg-blue-600 text-white hover:bg-blue-500"
                       : "border border-white/15 bg-white/5 text-white hover:border-blue-400 hover:bg-blue-500/10"
                   }`}
                 >
                   {plan.button}
-                </button>
+                </a>
               </div>
             ))}
           </div>
