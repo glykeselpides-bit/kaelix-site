@@ -221,22 +221,83 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="pricing" className="mx-auto max-w-5xl px-6 py-24 text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
-            Pricing
-          </p>
-          <h2 className="text-4xl font-bold md:text-5xl">
-            Start free. Scale when ready.
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-slate-400">
-            Kaelix is being built for communities that want premium systems without messy command clutter.
-          </p>
-
-          <div className="mt-10 rounded-3xl border border-blue-400/30 bg-black/45 p-8 backdrop-blur-xl">
-            <p className="text-2xl font-semibold">Pricing coming soon</p>
-            <p className="mt-3 text-slate-400">
-              Early access servers will be invited first.
+        <section id="pricing" className="mx-auto max-w-6xl px-6 py-20">
+          <div className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.45em] text-blue-300">
+              Pricing
             </p>
+
+            <h2 className="mt-5 text-4xl font-bold text-white md:text-6xl">
+              Flexible plans for every community.
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+              Start free and scale with advanced systems, analytics,
+              automation, activities, and premium community infrastructure.
+            </p>
+          </div>
+
+          <div className="mt-16 grid gap-6 md:grid-cols-3">
+            <div className="rounded-[28px] border border-white/10 bg-black/50 p-8 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/40">
+              <h3 className="text-3xl font-bold text-white">
+                Free
+              </h3>
+
+              <p className="mt-4 text-slate-300">
+                Perfect for smaller communities getting started with Kaelix.
+              </p>
+
+              <ul className="mt-6 space-y-3 text-sm text-slate-300">
+                <li>• Up to 60 members</li>
+                <li>• Events & onboarding</li>
+                <li>• Starter activities</li>
+              </ul>
+            </div>
+
+            <div className="rounded-[28px] border border-blue-400/40 bg-blue-500/10 p-8 shadow-[0_0_30px_rgba(59,130,246,0.12)] backdrop-blur-xl transition hover:-translate-y-2">
+              <div className="mb-4 inline-flex rounded-full border border-blue-400/40 bg-blue-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                Most Popular
+              </div>
+
+              <h3 className="text-3xl font-bold text-white">
+                Core
+              </h3>
+
+              <p className="mt-4 text-slate-300">
+                Built for active communities that need structure and engagement.
+              </p>
+
+              <ul className="mt-6 space-y-3 text-sm text-slate-300">
+                <li>• Weekly summaries</li>
+                <li>• DM notifications</li>
+                <li>• Expanded activities</li>
+              </ul>
+            </div>
+
+            <div className="rounded-[28px] border border-white/10 bg-black/50 p-8 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/40">
+              <h3 className="text-3xl font-bold text-white">
+                Pro
+              </h3>
+
+              <p className="mt-4 text-slate-300">
+                Advanced systems for larger and highly active communities.
+              </p>
+
+              <ul className="mt-6 space-y-3 text-sm text-slate-300">
+                <li>• Analytics & progression</li>
+                <li>• Full activity library</li>
+                <li>• Advanced faction systems</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <a
+              href="/pricing"
+              className="inline-flex rounded-2xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:scale-[1.03] hover:bg-blue-500"
+            >
+              View Plans
+            </a>
           </div>
         </section>
 

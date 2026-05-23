@@ -82,7 +82,7 @@ export default function PricingPage() {
               Pricing
             </p>
 
-            <h1 className="mt-5 text-5xl font-bold md:text-6xl">
+            <h1 className="mt-5 text-4xl font-bold md:text-5xl">
               Built for every community stage.
             </h1>
 
