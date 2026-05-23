@@ -76,13 +76,13 @@ export default function PricingPage() {
       <div className="min-h-screen bg-black/70">
         <Navbar />
 
-        <section className="mx-auto max-w-7xl px-6 pb-24 pt-36">
+        <section className="mx-auto max-w-6xl px-6 pb-24 pt-36">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.45em] text-blue-300">
               Pricing
             </p>
 
-            <h1 className="mt-5 text-5xl font-bold md:text-7xl">
+            <h1 className="mt-5 text-5xl font-bold md:text-6xl">
               Built for every community stage.
             </h1>
 
@@ -96,9 +96,9 @@ export default function PricingPage() {
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex flex-col rounded-[32px] border p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${
+                className={`relative flex h-full flex-col rounded-[32px] border p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-blue-400/40 ${
                   plan.highlight
-                    ? "border-blue-400/50 bg-blue-500/10 shadow-[0_0_40px_rgba(59,130,246,0.18)]"
+                    ? "border-blue-400/50 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.12)]"
                     : "border-white/10 bg-black/50"
                 }`}
               >
@@ -144,7 +144,7 @@ export default function PricingPage() {
                 </div>
 
                 <button
-                  className={`mt-8 rounded-2xl px-6 py-4 text-sm font-semibold transition ${
+                  className={`mt-auto rounded-2xl px-6 py-4 text-sm font-semibold transition ${
                     plan.highlight
                       ? "bg-blue-600 text-white hover:bg-blue-500"
                       : "border border-white/15 bg-white/5 text-white hover:border-blue-400 hover:bg-blue-500/10"
