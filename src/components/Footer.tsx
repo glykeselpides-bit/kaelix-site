@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-black/60">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
+      <div className="flex w-full items-center justify-between px-12 py-4">
         <div className="flex items-center gap-3">
           <img
             src="/kx_Logo.png"

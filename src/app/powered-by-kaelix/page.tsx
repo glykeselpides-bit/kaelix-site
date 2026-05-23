@@ -4,71 +4,88 @@ import Footer from "@/components/Footer";
 export default function PoweredByKaelixPage() {
   const projects = [
     {
-      name: "Activity Hub",
+      name: "Coming Soon",
+      type: "Bot",
       description:
-        "A fully interactive activity ecosystem with games, quizzes, events, progression, and competitive systems.",
+        "New community tools and Discord bots built under the Kaelix brand will appear here.",
       status: "In Development",
     },
     {
-      name: "Kaelix Analytics",
+      name: "Coming Soon",
+      type: "Game",
       description:
-        "Advanced server insights, participation tracking, engagement heatmaps, and growth analytics.",
+        "Interactive games, server activities, and community experiences powered by the Kaelix ecosystem.",
       status: "Planned",
     },
     {
-      name: "Automation Suite",
+      name: "Coming Soon",
+      type: "Tool",
       description:
-        "Powerful automation tools for onboarding, moderation, scheduling, role systems, and workflows.",
+        "Standalone tools, dashboards, and utilities created to support modern online communities.",
       status: "Planned",
-    },
-    {
-      name: "Kaelix Web Dashboard",
-      description:
-        "A full management dashboard for configuring and controlling your community outside Discord.",
-      status: "In Progress",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-black px-6 py-24 text-white">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-16 text-center">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-blue-400">
-            Powered by Kaelix
-          </p>
+    <>
+      <Navbar />
 
-          <h1 className="mb-6 text-5xl font-black tracking-tight sm:text-6xl">
-            Expanding the Kaelix ecosystem.
-          </h1>
+      <main className="min-h-screen bg-black px-6 py-24 text-white">
+        <div className="mx-auto max-w-6xl">
+          <section className="mb-16 text-center">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-blue-400">
+              Powered by Kaelix
+            </p>
 
-          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-slate-400">
-            Kaelix is evolving beyond a single Discord bot into a growing
-            ecosystem of systems, tools, analytics, automation, and community
-            infrastructure.
-          </p>
-        </div>
+            <h1 className="mb-6 text-5xl font-black tracking-tight sm:text-6xl">
+              Built under the Kaelix brand.
+            </h1>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {projects.map((project) => (
-            <div
-              key={project.name}
-              className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm"
-            >
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <h2 className="text-2xl font-bold">{project.name}</h2>
+            <p className="mx-auto max-w-3xl text-lg leading-relaxed text-slate-400">
+              A future home for bots, games, tools, and community systems
+              created by our team and powered by the Kaelix ecosystem.
+            </p>
+          </section>
 
-                <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-300">
-                  {project.status}
-                </span>
+          <section className="grid gap-6 md:grid-cols-3">
+            {projects.map((project, index) => (
+              <div
+                key={index}
+                className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm"
+              >
+                <div className="mb-6 flex items-center justify-between gap-4">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-300">
+                    {project.type}
+                  </span>
+
+                  <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-300">
+                    {project.status}
+                  </span>
+                </div>
+
+                <h2 className="mb-4 text-2xl font-bold">{project.name}</h2>
+
+                <p className="leading-relaxed text-slate-400">
+                  {project.description}
+                </p>
               </div>
+            ))}
+          </section>
 
-              <p className="leading-relaxed text-slate-400">
-                {project.description}
-              </p>
-            </div>
-          ))}
+          <section className="mt-16 rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center">
+            <h2 className="mb-4 text-3xl font-black">
+              More projects are coming.
+            </h2>
+
+            <p className="mx-auto max-w-2xl text-slate-400">
+              As the Kaelix brand grows, this page will showcase every product,
+              experiment, bot, game, and system released by the team.
+            </p>
+          </section>
         </div>
-      </div>
-    </main>
+      </main>
+
+      <Footer />
+    </>
   );
 }
