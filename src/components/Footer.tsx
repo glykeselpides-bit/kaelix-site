@@ -1,13 +1,13 @@
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-black/60">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-3 md:flex-row md:items-start md:justify-between">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <img
               src="/kx_Logo.png"
               alt="Kaelix Logo"
-              className="h-10 w-10 object-contain"
+              className="h-8 w-8 object-contain"
             />
 
             <span className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-200">
@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/5 py-5 text-center text-[10px] tracking-[0.25em] text-slate-500">
+      <div className="border-t border-white/5 py-2 text-center text-[10px] tracking-[0.25em] text-slate-500">
         © 2026 Kaelix
       </div>
     </footer>
