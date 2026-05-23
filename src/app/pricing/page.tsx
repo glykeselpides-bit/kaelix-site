@@ -32,8 +32,8 @@ const plans = [
     ],
     activities:
       "Quiz, Cipher, Hidden Word, Story Chain, Caption This",
-    button: "Upgrade to Core",
-    highlight: true,
+    button: "Choose Core",
+    highlight: false,
   },
   {
     name: "Pro",
@@ -49,8 +49,8 @@ const plans = [
       "Expanded faction systems",
     ],
     activities: "All Activities Included",
-    button: "Go Pro",
-    highlight: false,
+    button: "Choose Pro",
+    highlight: true,
   },
   {
     name: "Elite",
