@@ -9,7 +9,7 @@ export default function Home() {
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
       <div className="min-h-screen bg-black/25">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/35 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+          <div className="flex w-full items-center justify-between px-10 py-4 sm:px-14 2xl:px-20">
             <a
               href="#"
               className="flex items-center gap-3 transition hover:opacity-80"

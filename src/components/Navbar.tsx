@@ -17,7 +17,7 @@ export default function Navbar({ variant = "page" }: NavbarProps) {
 
   return (
     <nav className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/35 backdrop-blur-xl">
-      <div className="flex w-full items-center justify-between px-8 py-4 sm:px-10 xl:px-14">
+      <div className="flex w-full items-center justify-between px-10 py-4 sm:px-14 2xl:px-20">
         <a
           href={isHome ? "#top" : "/"}
           className="flex items-center gap-3 transition hover:opacity-80"
