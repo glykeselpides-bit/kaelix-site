@@ -9,11 +9,11 @@ export default function DocsPage() {
 
         <section className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 pt-28 text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.45em] text-blue-300">
-            Docs
+            Dashboard
           </p>
 
           <h1 className="mt-5 text-5xl font-bold md:text-6xl">
-            Documentation is coming soon.
+            The Kaelix dashboard is currently in development.
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">
