@@ -343,36 +343,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <footer className="border-t border-white/10 bg-black/40 px-6 py-8 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 text-left">
-            <div className="flex items-center gap-4">
-              <img
-                src="/kx_Logo.png"
-                alt="Kaelix Logo"
-                className="h-10 w-10 object-contain"
-              />
-
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-200">
-                  Kaelix
-                </p>
-
-                <p className="text-sm text-slate-500">
-                  Community infrastructure reimagined.
-                </p>
-              </div>
-            </div>
-
-            <div className="text-sm text-slate-400">
-              <a
-                href="mailto:hello@joinkaelix.com"
-                className="rounded-full border border-white/10 px-5 py-2 transition hover:border-blue-400/40 hover:text-white"
-              >
-                Contact
-              </a>
-            </div>
-          </div>
-        </footer>
       </div>
      <Footer />
    </main>
