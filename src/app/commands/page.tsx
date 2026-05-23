@@ -214,6 +214,7 @@ export default function CommandsPage() {
           </div>
         </div>
       </div>
-    </main>
+     <Footer />
+   </main>
   );
 }

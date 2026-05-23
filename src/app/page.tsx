@@ -374,6 +374,7 @@ export default function Home() {
           </div>
         </footer>
       </div>
-    </main>
+     <Footer />
+   </main>
   );
 }

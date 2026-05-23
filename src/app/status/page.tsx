@@ -31,6 +31,7 @@ export default function DocsPage() {
           </a>
         </section>
       </div>
+      <Footer />
     </main>
   );
 }
