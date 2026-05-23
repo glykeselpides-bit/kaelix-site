@@ -249,7 +249,7 @@ export default function Home() {
 
         <section
           id="community"
-          className="mx-auto max-w-6xl px-6 py-12"
+          className="mx-auto max-w-6xl px-6 py-24"
         >
           <div className="rounded-3xl border border-blue-400/20 bg-black/40 p-12 backdrop-blur-xl">
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.4em] text-blue-300">
