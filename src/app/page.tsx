@@ -22,14 +22,7 @@ export default function Home() {
               <a className="transition hover:text-white" href="#features">Features</a>
               <a className="transition hover:text-white" href="#preview">Preview</a>
               <a className="transition hover:text-white" href="#pricing">Pricing</a>
-              <a
-                className="transition hover:text-white"
-                href="#community"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Community
-              </a>
+              <a className="transition hover:text-white" href="#community">Community</a>
             </div>
 
             <div className="flex items-center gap-4">
