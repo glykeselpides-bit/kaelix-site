@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { headers } from "next/headers";
 
 const navigation = [
   {
@@ -48,6 +49,7 @@ export default async function ServerLayout({
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = await params;
+  const pathname = (await headers()).get("x-pathname") || "";
 
   return (
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
@@ -70,10 +72,14 @@ export default async function ServerLayout({
                   key={item.title}
                   href={
                     item.href
-                      ? `/servers/${guildId}/${item.href}`
-                      : `/servers/${guildId}`
-                  }
-                  className="rounded-2xl border border-transparent px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-blue-400/30 hover:bg-blue-500/10 hover:text-white"
+                        ? `/servers/${guildId}/${item.href}`
+                        : `/servers/${guildId}`
+                    }
+                  className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                    pathname.includes(item.href)
+                        ? "border-blue-400/40 bg-blue-500/15 text-white"
+                        : "border-transparent text-slate-300 hover:border-blue-400/30 hover:bg-blue-500/10 hover:text-white"
+                    }`}
                 >
                   {item.title}
                 </Link>
