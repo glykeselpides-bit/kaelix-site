@@ -16,7 +16,6 @@ function canManageServer(permissions: string, owner: boolean) {
   if (owner) return true;
 
   const permissionBits = BigInt(permissions);
-
   const ADMINISTRATOR = BigInt(0x0000000000000008);
   const MANAGE_GUILD = BigInt(0x0000000000000020);
 
@@ -29,6 +28,7 @@ function canManageServer(permissions: string, owner: boolean) {
 export default function DashboardGate() {
   const { data: session, status } = useSession();
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
+  const [botGuildIds, setBotGuildIds] = useState<string[]>([]);
   const [loadingGuilds, setLoadingGuilds] = useState(false);
 
   useEffect(() => {
@@ -37,11 +37,18 @@ export default function DashboardGate() {
     async function loadGuilds() {
       setLoadingGuilds(true);
 
-      const response = await fetch("/api/discord/guilds");
-      const data = await response.json();
+      const userResponse = await fetch("/api/discord/guilds");
+      const userData = await userResponse.json();
 
-      if (Array.isArray(data)) {
-        setGuilds(data);
+      const botResponse = await fetch("/api/discord/bot-guilds");
+      const botData = await botResponse.json();
+
+      if (Array.isArray(userData)) {
+        setGuilds(userData);
+      }
+
+      if (Array.isArray(botData)) {
+        setBotGuildIds(botData);
       }
 
       setLoadingGuilds(false);
@@ -98,32 +105,36 @@ export default function DashboardGate() {
       )}
 
       <div className="mt-8 grid gap-5 md:grid-cols-2">
-        {manageableGuilds.map((guild) => (
-          <div
-            key={guild.id}
-            className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-blue-400/40 hover:bg-blue-500/[0.03]"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-2xl font-bold text-white">
-                  {guild.name}
-                </h3>
+        {manageableGuilds.map((guild) => {
+          const isConnected = botGuildIds.includes(guild.id);
 
-                <p className="mt-2 text-sm text-slate-400">
-                  Server ID: {guild.id}
-                </p>
+          return (
+            <div
+              key={guild.id}
+              className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-blue-400/40 hover:bg-blue-500/[0.03]"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-bold text-white">
+                    {guild.name}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-slate-400">
+                    Server ID: {guild.id}
+                  </p>
+                </div>
+
+                <div className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                  {isConnected ? "Connected" : "Invite Kaelix"}
+                </div>
               </div>
 
-              <div className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
-                Manageable
-              </div>
+              <button className="mt-8 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400 hover:bg-blue-500/10">
+                {isConnected ? "Manage Server" : "Invite Kaelix"}
+              </button>
             </div>
-
-            <button className="mt-8 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400 hover:bg-blue-500/10">
-              Manage Server
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <button
