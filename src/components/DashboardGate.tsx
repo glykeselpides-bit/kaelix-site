@@ -129,9 +129,23 @@ export default function DashboardGate() {
                 </div>
               </div>
 
-              <button className="mt-8 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400 hover:bg-blue-500/10">
-                {isConnected ? "Manage Server" : "Invite Kaelix"}
-              </button>
+              {isConnected ? (
+                <Link
+                  href={`/servers/${guild.id}`}
+                  className="mt-8 inline-flex rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400 hover:bg-blue-500/10"
+                >
+                  Manage Server
+                </Link>
+              ) : (
+                <a
+                  href="https://discord.gg/2PYbjwmHRX"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-8 inline-flex rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400 hover:bg-blue-500/10"
+                >
+                  Invite Kaelix
+                </a>
+              )}
             </div>
           );
         })}
