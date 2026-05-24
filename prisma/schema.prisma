@@ -1,9 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
+  output   = "../src/generated/prisma"
 }
 
 model active_item_effects {
