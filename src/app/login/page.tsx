@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LoginButton from "@/components/LoginButton";
 
 export default function LoginPage() {
   return (
@@ -21,13 +22,8 @@ export default function LoginPage() {
             settings, and access dashboard tools.
           </p>
 
-          <button className="mt-10 rounded-2xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-blue-500">
-            Log in with Discord
-          </button>
+          <LoginButton />
 
-          <p className="mt-6 text-sm text-slate-500">
-            Discord login is coming soon.
-          </p>
         </section>
       </main>
 

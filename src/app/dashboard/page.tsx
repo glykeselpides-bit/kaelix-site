@@ -1,6 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+import DashboardGate from "@/components/DashboardGate";
+
 export default function DocsPage() {
   return (
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
@@ -22,14 +24,7 @@ export default function DocsPage() {
             and future dashboard tools.
           </p>
 
-          <a
-            href="/login"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-10 rounded-2xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:scale-[1.03] hover:bg-blue-500"
-          >
-            Log in with Discord
-          </a>
+          <DashboardGate />
         </section>
       </div>
      <Footer />
