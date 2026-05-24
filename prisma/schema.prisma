@@ -1,0 +1,978 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model active_item_effects {
+  id                Int      @id @default(autoincrement())
+  source_user_id    BigInt
+  target_user_id    BigInt
+  item_key          String   @db.VarChar(100)
+  trivia_session_id Int
+  applies_to_round  Int?
+  applies_to_block  Int?
+  is_consumed       Boolean
+  created_at        DateTime @db.Timestamptz(6)
+}
+
+model activity_answers {
+  id          Int      @id @default(autoincrement())
+  session_id  Int
+  user_id     BigInt
+  question_id Int
+  is_correct  Boolean
+  answered_at DateTime @db.Timestamptz(6)
+}
+
+model activity_questions {
+  id       Int    @id @default(autoincrement())
+  question String @db.VarChar(500)
+  answer   String @db.VarChar(200)
+}
+
+model activity_sessions {
+  id                  Int       @id @default(autoincrement())
+  is_active           Boolean
+  started_at          DateTime  @db.Timestamptz(6)
+  ended_at            DateTime? @db.Timestamptz(6)
+  current_question_id Int?
+  question_number     Int
+  question_pool       Json      @db.Json
+}
+
+model audit_logs {
+  id             Int      @id @default(autoincrement())
+  guild_id       BigInt
+  action_type    String   @db.VarChar(50)
+  entity_type    String   @db.VarChar(50)
+  entity_id      String?  @db.VarChar(50)
+  actor_id       BigInt?
+  target_user_id BigInt?
+  details        String?  @db.VarChar(2000)
+  created_at     DateTime @db.Timestamptz(6)
+
+  @@index([action_type], map: "ix_audit_logs_action_type")
+  @@index([actor_id], map: "ix_audit_logs_actor_id")
+  @@index([guild_id, created_at], map: "ix_audit_logs_guild_created")
+  @@index([guild_id], map: "ix_audit_logs_guild_id")
+  @@index([target_user_id], map: "ix_audit_logs_target_user_id")
+}
+
+model caption_this_entries {
+  id                Int      @id @default(autoincrement())
+  session_id        Int
+  guild_id          BigInt
+  user_id           BigInt
+  caption_text      String   @db.VarChar(500)
+  voting_message_id BigInt?
+  submitted_at      DateTime @db.Timestamptz(6)
+}
+
+model caption_this_sessions {
+  id                          Int       @id @default(autoincrement())
+  guild_id                    BigInt
+  is_active                   Boolean
+  phase                       String    @db.VarChar(20)
+  image_url                   String    @db.VarChar(1000)
+  reward_points               Int
+  submission_ends_at          DateTime  @db.Timestamptz(6)
+  voting_ends_at              DateTime? @db.Timestamptz(6)
+  winner_user_id              BigInt?
+  started_at                  DateTime  @db.Timestamptz(6)
+  ended_at                    DateTime? @db.Timestamptz(6)
+  channel_id                  BigInt?
+  submission_duration_seconds Int
+  voting_duration_seconds     Int
+}
+
+model caption_this_votes {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  guild_id      BigInt
+  entry_id      Int
+  voter_user_id BigInt
+  created_at    DateTime @db.Timestamptz(6)
+}
+
+model cipher_sessions {
+  id             Int       @id @default(autoincrement())
+  guild_id       BigInt
+  is_active      Boolean
+  word_id        Int
+  scrambled_word String    @db.VarChar(100)
+  started_at     DateTime  @db.Timestamptz(6)
+  ended_at       DateTime? @db.Timestamptz(6)
+  winner_user_id BigInt?
+}
+
+model cipher_words {
+  id            Int     @id @default(autoincrement())
+  word          String  @db.VarChar(100)
+  hint          String? @db.VarChar(300)
+  difficulty    String? @db.VarChar(50)
+  reward_points Int
+}
+
+model emoji_race_participants {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  guild_id      BigInt
+  user_id       BigInt
+  is_eliminated Boolean
+  joined_at     DateTime @db.Timestamptz(6)
+}
+
+model emoji_race_prompts {
+  id             Int     @id @default(autoincrement())
+  prompt_text    String  @db.VarChar(300)
+  option_1       String  @db.VarChar(20)
+  option_2       String  @db.VarChar(20)
+  option_3       String  @db.VarChar(20)
+  option_4       String  @db.VarChar(20)
+  correct_option Int
+  difficulty     String? @db.VarChar(50)
+  reward_points  Int
+}
+
+model emoji_race_responses {
+  id           Int      @id @default(autoincrement())
+  session_id   Int
+  guild_id     BigInt
+  round_number Int
+  prompt_id    Int
+  user_id      BigInt
+  emoji        String   @db.VarChar(20)
+  is_correct   Boolean
+  answered_at  DateTime @db.Timestamptz(6)
+}
+
+model emoji_race_sessions {
+  id                 Int       @id @default(autoincrement())
+  guild_id           BigInt
+  is_active          Boolean
+  has_started        Boolean
+  total_rounds       Int
+  current_round      Int
+  current_prompt_id  Int?
+  current_message_id BigInt?
+  current_channel_id BigInt?
+  prompt_pool        Json?     @db.Json
+  started_at         DateTime  @db.Timestamptz(6)
+  ended_at           DateTime? @db.Timestamptz(6)
+}
+
+model event_reminder_logs {
+  id             Int      @id @default(autoincrement())
+  guild_id       BigInt
+  event_id       Int
+  user_id        BigInt
+  offset_minutes Int
+  created_at     DateTime @db.Timestamptz(6)
+
+  @@unique([guild_id, event_id, user_id, offset_minutes], map: "uq_event_reminder_log_guild_event_user_offset")
+  @@index([event_id], map: "ix_event_reminder_logs_event_id")
+  @@index([event_id, offset_minutes], map: "ix_event_reminder_logs_event_offset")
+  @@index([guild_id], map: "ix_event_reminder_logs_guild_id")
+  @@index([guild_id, user_id], map: "ix_event_reminder_logs_guild_user")
+  @@index([user_id], map: "ix_event_reminder_logs_user_id")
+}
+
+model event_rewards {
+  id                   Int      @id @default(autoincrement())
+  event_id             Int
+  user_id              BigInt
+  guild_id             BigInt
+  points_awarded       Int
+  awarded_by           BigInt?
+  point_transaction_id Int?
+  created_at           DateTime @db.Timestamptz(6)
+  events               events   @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([event_id, user_id], map: "uq_event_rewards_event_user")
+  @@index([event_id], map: "ix_event_rewards_event_id")
+  @@index([user_id], map: "ix_event_rewards_user_id")
+}
+
+model events {
+  id                      Int             @id @default(autoincrement())
+  event_code              String          @unique(map: "uq_events_event_code") @db.VarChar(4)
+  guild_id                BigInt
+  channel_id              BigInt
+  name                    String          @db.VarChar(100)
+  starts_at               DateTime        @db.Timestamptz(6)
+  source_timezone         String          @db.VarChar(64)
+  created_by              BigInt
+  reward_points           Int
+  recurrence              String          @db.VarChar(16)
+  series_id               String?         @db.VarChar(36)
+  is_series_template      Boolean
+  reminder_offsets        String          @db.VarChar(200)
+  sent_reminders          String          @db.VarChar(200)
+  notification_role_ids   String          @db.VarChar(500)
+  status                  String          @db.VarChar(20)
+  announcement_channel_id BigInt?
+  announcement_message_id BigInt?
+  created_at              DateTime        @db.Timestamptz(6)
+  event_rewards           event_rewards[]
+  participation           participation[]
+
+  @@index([event_code], map: "ix_events_event_code")
+  @@index([guild_id], map: "ix_events_guild_id")
+  @@index([series_id], map: "ix_events_series_id")
+}
+
+model faction_answers {
+  id                Int               @id @default(autoincrement())
+  question_id       Int
+  faction_id        Int
+  answer_text       String            @db.VarChar(300)
+  answer_order      Int
+  points            Int
+  factions          factions          @relation(fields: [faction_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  faction_questions faction_questions @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([faction_id], map: "ix_faction_answers_faction_id")
+  @@index([question_id], map: "ix_faction_answers_question_id")
+}
+
+model faction_questions {
+  id              Int               @id @default(autoincrement())
+  quiz_id         Int
+  question_text   String            @db.VarChar(500)
+  question_order  Int
+  is_active       Boolean
+  faction_answers faction_answers[]
+  faction_quizzes faction_quizzes   @relation(fields: [quiz_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([quiz_id], map: "ix_faction_questions_quiz_id")
+}
+
+model faction_quizzes {
+  id                  Int                   @id @default(autoincrement())
+  guild_id            BigInt
+  name                String                @db.VarChar(100)
+  description         String?               @db.VarChar(500)
+  is_active           Boolean
+  allow_retake        Boolean
+  created_at          DateTime              @db.Timestamp(6)
+  updated_at          DateTime              @db.Timestamp(6)
+  faction_questions   faction_questions[]
+  onboarding_sessions onboarding_sessions[]
+  user_factions       user_factions[]
+
+  @@index([guild_id], map: "ix_faction_quizzes_guild_id")
+}
+
+model factions {
+  id              Int               @id @default(autoincrement())
+  guild_id        BigInt
+  key             String            @db.VarChar(50)
+  name            String            @db.VarChar(100)
+  description     String?           @db.VarChar(500)
+  role_id         BigInt?
+  emoji           String?           @db.VarChar(50)
+  color           String?           @db.VarChar(20)
+  is_active       Boolean
+  created_at      DateTime          @db.Timestamp(6)
+  updated_at      DateTime          @db.Timestamp(6)
+  faction_answers faction_answers[]
+  user_factions   user_factions[]
+
+  @@index([guild_id], map: "ix_factions_guild_id")
+}
+
+model gif_battle_entries {
+  id                    Int      @id @default(autoincrement())
+  session_id            Int
+  guild_id              BigInt
+  user_id               BigInt
+  gif_url               String   @db.VarChar(1000)
+  caption               String?  @db.VarChar(300)
+  submission_message_id BigInt?
+  voting_message_id     BigInt?
+  submitted_at          DateTime @db.Timestamptz(6)
+}
+
+model gif_battle_sessions {
+  id                          Int       @id @default(autoincrement())
+  guild_id                    BigInt
+  channel_id                  BigInt?
+  is_active                   Boolean
+  phase                       String    @db.VarChar(20)
+  prompt_text                 String    @db.VarChar(300)
+  reward_points               Int
+  submission_duration_seconds Int
+  voting_duration_seconds     Int
+  submission_ends_at          DateTime  @db.Timestamptz(6)
+  voting_ends_at              DateTime? @db.Timestamptz(6)
+  winner_user_id              BigInt?
+  started_at                  DateTime  @db.Timestamptz(6)
+  ended_at                    DateTime? @db.Timestamptz(6)
+}
+
+model gif_battle_votes {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  guild_id      BigInt
+  entry_id      Int
+  voter_user_id BigInt
+  created_at    DateTime @db.Timestamptz(6)
+}
+
+model guild_config {
+  guild_id                      BigInt    @id @default(autoincrement())
+  points_per_message            Int
+  points_per_reaction           Int
+  default_event_points          Int
+  voice_points_per_minute       Int
+  message_cooldown_seconds      Int
+  reaction_cooldown_seconds     Int
+  voice_reward_interval_seconds Int
+  enable_message_points         Boolean
+  enable_reaction_points        Boolean
+  enable_event_points           Boolean
+  enable_voice_points           Boolean
+  enable_achievements           Boolean
+  enable_activities             Boolean
+  excluded_channel_ids          Json      @db.Json
+  excluded_role_ids             Json      @db.Json
+  bonus_channel_ids             Json      @db.Json
+  send_dm_notifications         Boolean
+  event_reminder_channel_id     BigInt?
+  admin_log_channel_id          BigInt?
+  onboarding_enabled            Boolean
+  active_quiz_id                BigInt?
+  allow_retake                  Boolean
+  result_visibility             String    @db.VarChar(20)
+  welcome_channel_id            BigInt?
+  weekly_summary_enabled        Boolean
+  weekly_summary_channel_id     BigInt?
+  weekly_summary_day            Int
+  weekly_summary_hour           Int
+  weekly_summary_minute         Int
+  weekly_summary_last_sent_at   DateTime? @db.Timestamptz(6)
+  extra_settings                Json      @db.Json
+}
+
+model guild_feature_overrides {
+  id                 Int       @id @default(autoincrement())
+  guild_id           BigInt
+  key                String    @db.VarChar(128)
+  bool_value         Boolean?
+  int_value          Int?
+  source             String    @db.VarChar(64)
+  reason             String?
+  expires_at         DateTime? @db.Timestamptz(6)
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @default(now()) @db.Timestamptz(6)
+  string_value       String?   @db.VarChar(128)
+  created_by_user_id BigInt?
+
+  @@unique([guild_id, key, source, expires_at], map: "uq_guild_feature_override_scope")
+  @@index([guild_id, key, expires_at, updated_at], map: "ix_guild_feature_override_lookup")
+  @@index([guild_id], map: "ix_guild_feature_overrides_guild_id")
+  @@index([key], map: "ix_guild_feature_overrides_key")
+}
+
+model guild_subscriptions {
+  id                     Int       @id @default(autoincrement())
+  guild_id               BigInt    @unique(map: "ix_guild_subscriptions_guild_id")
+  plan                   String    @db.VarChar(32)
+  status                 String    @db.VarChar(32)
+  stripe_customer_id     String?   @db.VarChar(255)
+  stripe_subscription_id String?   @db.VarChar(255)
+  current_period_end     DateTime? @db.Timestamptz(6)
+  trial_used             Boolean
+  trial_ends_at          DateTime? @db.Timestamptz(6)
+  cancel_at_period_end   Boolean
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([plan, status], map: "ix_guild_subscription_plan_status")
+  @@index([stripe_subscription_id], map: "ix_guild_subscriptions_stripe_subscription_id")
+}
+
+model hidden_word_sessions {
+  id             Int       @id @default(autoincrement())
+  guild_id       BigInt
+  is_active      Boolean
+  word_id        Int
+  revealed_state Json      @db.Json
+  started_at     DateTime  @db.Timestamptz(6)
+  ended_at       DateTime? @db.Timestamptz(6)
+  winner_user_id BigInt?
+}
+
+model hidden_words {
+  id            Int     @id @default(autoincrement())
+  word          String  @db.VarChar(100)
+  hint          String? @db.VarChar(300)
+  difficulty    String? @db.VarChar(50)
+  reward_points Int
+}
+
+model hot_takes_entries {
+  id                Int      @id @default(autoincrement())
+  session_id        Int
+  guild_id          BigInt
+  user_id           BigInt
+  take_text         String   @db.VarChar(500)
+  voting_message_id BigInt?
+  submitted_at      DateTime @db.Timestamptz(6)
+}
+
+model hot_takes_sessions {
+  id                          Int       @id @default(autoincrement())
+  guild_id                    BigInt
+  is_active                   Boolean
+  phase                       String    @db.VarChar(20)
+  reward_points               Int
+  submission_ends_at          DateTime  @db.Timestamptz(6)
+  voting_ends_at              DateTime? @db.Timestamptz(6)
+  winner_user_id              BigInt?
+  started_at                  DateTime  @db.Timestamptz(6)
+  ended_at                    DateTime? @db.Timestamptz(6)
+  channel_id                  BigInt?
+  submission_duration_seconds Int
+  voting_duration_seconds     Int
+}
+
+model hot_takes_votes {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  guild_id      BigInt
+  entry_id      Int
+  voter_user_id BigInt
+  created_at    DateTime @db.Timestamptz(6)
+}
+
+model mcq_questions {
+  id             Int     @id @default(autoincrement())
+  question       String  @db.VarChar(500)
+  option_a       String  @db.VarChar(300)
+  option_b       String  @db.VarChar(300)
+  option_c       String  @db.VarChar(300)
+  option_d       String  @db.VarChar(300)
+  correct_option String  @db.VarChar(1)
+  difficulty     String? @db.VarChar(50)
+  reward_points  Int
+}
+
+model mcq_responses {
+  id              Int      @id @default(autoincrement())
+  session_id      Int
+  guild_id        BigInt
+  user_id         BigInt
+  selected_option String   @db.VarChar(1)
+  answered_at     DateTime @db.Timestamptz(6)
+}
+
+model mcq_sessions {
+  id             Int       @id @default(autoincrement())
+  guild_id       BigInt
+  is_active      Boolean
+  question_id    Int
+  started_at     DateTime  @db.Timestamptz(6)
+  ended_at       DateTime? @db.Timestamptz(6)
+  winner_user_id BigInt?
+}
+
+model meme_war_entries {
+  id                    Int      @id @default(autoincrement())
+  session_id            Int
+  guild_id              BigInt
+  user_id               BigInt
+  image_url             String   @db.VarChar(1000)
+  caption               String?  @db.VarChar(300)
+  submission_message_id BigInt?
+  voting_message_id     BigInt?
+  submitted_at          DateTime @db.Timestamptz(6)
+}
+
+model meme_war_sessions {
+  id                          Int       @id @default(autoincrement())
+  guild_id                    BigInt
+  is_active                   Boolean
+  phase                       String    @db.VarChar(20)
+  reward_points               Int
+  submission_ends_at          DateTime  @db.Timestamptz(6)
+  voting_ends_at              DateTime? @db.Timestamptz(6)
+  winner_user_id              BigInt?
+  started_at                  DateTime  @db.Timestamptz(6)
+  ended_at                    DateTime? @db.Timestamptz(6)
+  channel_id                  BigInt?
+  submission_duration_seconds Int
+  voting_duration_seconds     Int
+}
+
+model meme_war_votes {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  guild_id      BigInt
+  entry_id      Int
+  voter_user_id BigInt
+  created_at    DateTime @db.Timestamptz(6)
+}
+
+model mention_cooldowns {
+  id                Int      @id @default(autoincrement())
+  sender_id         BigInt
+  receiver_id       BigInt
+  last_mentioned_at DateTime @db.Timestamptz(6)
+}
+
+model notification_usage {
+  guild_id   BigInt
+  year       Int
+  month      Int
+  sent_count Int
+  updated_at DateTime @db.Timestamptz(6)
+
+  @@id([guild_id, year, month])
+}
+
+model onboarding_sessions {
+  id                     Int              @id @default(autoincrement())
+  guild_id               BigInt
+  user_id                BigInt
+  quiz_id                Int?
+  status                 String           @db.VarChar(50)
+  current_step           String           @db.VarChar(50)
+  current_question_index Int
+  answers_json           String?
+  started_at             DateTime         @db.Timestamp(6)
+  completed_at           DateTime?        @db.Timestamp(6)
+  expires_at             DateTime         @db.Timestamp(6)
+  faction_quizzes        faction_quizzes? @relation(fields: [quiz_id], references: [id], onUpdate: NoAction)
+
+  @@index([guild_id], map: "ix_onboarding_sessions_guild_id")
+  @@index([user_id], map: "ix_onboarding_sessions_user_id")
+}
+
+model participation {
+  id            Int       @id @default(autoincrement())
+  event_id      Int
+  user_id       BigInt
+  attended      Boolean
+  registered_at DateTime  @db.Timestamptz(6)
+  registered_by BigInt?
+  attended_at   DateTime? @db.Timestamptz(6)
+  attended_by   BigInt?
+  events        events    @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([event_id, user_id], map: "uq_participation_event_user")
+  @@index([event_id], map: "ix_participation_event_id")
+  @@index([user_id], map: "ix_participation_user_id")
+}
+
+model personal_digest_snapshots {
+  id               Int      @id @default(autoincrement())
+  guild_id         BigInt
+  user_id          BigInt
+  period_start     DateTime @db.Timestamptz(6)
+  period_end       DateTime @db.Timestamptz(6)
+  total_points     Int
+  total_xp         Int
+  level            Int
+  leaderboard_rank Int?
+  created_at       DateTime @db.Timestamptz(6)
+
+  @@unique([guild_id, user_id, period_start, period_end], map: "uq_personal_digest_snapshot_period")
+  @@index([guild_id], map: "ix_personal_digest_snapshots_guild_id")
+  @@index([guild_id, user_id, period_end], map: "ix_personal_digest_snapshots_guild_user_end")
+  @@index([user_id], map: "ix_personal_digest_snapshots_user_id")
+}
+
+model point_transactions {
+  id          Int      @id @default(autoincrement())
+  guild_id    BigInt
+  user_id     BigInt
+  amount      Int
+  reason      String   @db.VarChar(255)
+  source_type String   @db.VarChar(50)
+  source_id   String?  @db.VarChar(50)
+  actor_id    BigInt?
+  created_at  DateTime @db.Timestamptz(6)
+
+  @@index([guild_id], map: "ix_point_transactions_guild_id")
+  @@index([guild_id, user_id], map: "ix_point_transactions_guild_user")
+  @@index([source_type, source_id], map: "ix_point_transactions_source")
+  @@index([user_id], map: "ix_point_transactions_user_id")
+}
+
+model puzzle_drop_puzzles {
+  id               Int      @id @default(autoincrement())
+  puzzle_type      String   @db.VarChar(50)
+  title            String?  @db.VarChar(200)
+  prompt_text      String
+  answer_text      String   @db.VarChar(300)
+  explanation_text String?
+  reward_points    Int
+  created_at       DateTime @db.Timestamptz(6)
+}
+
+model puzzle_drop_sessions {
+  id               Int       @id @default(autoincrement())
+  guild_id         BigInt
+  channel_id       BigInt?
+  is_active        Boolean
+  puzzle_id        Int
+  puzzle_type      String    @db.VarChar(50)
+  prompt_text      String
+  answer_text      String    @db.VarChar(300)
+  explanation_text String?
+  reward_points    Int
+  winner_user_id   BigInt?
+  started_at       DateTime  @db.Timestamptz(6)
+  ended_at         DateTime? @db.Timestamptz(6)
+}
+
+model reaction_logs {
+  id         Int    @id @default(autoincrement())
+  reactor_id BigInt
+  message_id BigInt
+}
+
+model reflex_participants {
+  id         Int      @id @default(autoincrement())
+  session_id Int
+  guild_id   BigInt
+  user_id    BigInt
+  score      Int
+  joined_at  DateTime @db.Timestamptz(6)
+}
+
+model reflex_question_attempts {
+  id          Int      @id @default(autoincrement())
+  session_id  Int
+  guild_id    BigInt
+  question_id Int
+  user_id     BigInt
+  status      String   @db.VarChar(20)
+  created_at  DateTime @db.Timestamptz(6)
+}
+
+model reflex_questions {
+  id            Int     @id @default(autoincrement())
+  question      String  @db.VarChar(500)
+  answer        String  @db.VarChar(200)
+  difficulty    String? @db.VarChar(50)
+  reward_points Int
+}
+
+model reflex_sessions {
+  id                      Int       @id @default(autoincrement())
+  guild_id                BigInt
+  is_active               Boolean
+  has_started             Boolean
+  total_questions         Int
+  current_question_number Int
+  current_question_id     Int?
+  buzzed_user_id          BigInt?
+  buzz_deadline_at        DateTime? @db.Timestamptz(6)
+  started_at              DateTime  @db.Timestamptz(6)
+  ended_at                DateTime? @db.Timestamptz(6)
+  question_pool           Json?     @db.Json
+}
+
+model riddle_attempts {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  guild_id      BigInt
+  user_id       BigInt
+  attempt_count Int
+  hint_revealed Boolean
+  created_at    DateTime @db.Timestamptz(6)
+}
+
+model riddle_questions {
+  id            Int     @id @default(autoincrement())
+  question      String  @db.VarChar(500)
+  answer        String  @db.VarChar(200)
+  hint          String? @db.VarChar(300)
+  difficulty    String? @db.VarChar(50)
+  reward_points Int
+}
+
+model riddle_sessions {
+  id             Int       @id @default(autoincrement())
+  guild_id       BigInt
+  is_active      Boolean
+  question_id    Int
+  started_at     DateTime  @db.Timestamptz(6)
+  ended_at       DateTime? @db.Timestamptz(6)
+  winner_user_id BigInt?
+}
+
+model shop_inventory {
+  id       Int    @id @default(autoincrement())
+  user_id  BigInt
+  item_key String @db.VarChar(100)
+  quantity Int
+}
+
+model speed_typing_prompts {
+  id            Int     @id @default(autoincrement())
+  phrase        String  @db.VarChar(300)
+  difficulty    String? @db.VarChar(50)
+  reward_points Int
+}
+
+model speed_typing_sessions {
+  id             Int       @id @default(autoincrement())
+  guild_id       BigInt
+  is_active      Boolean
+  prompt_id      Int
+  winner_user_id BigInt?
+  started_at     DateTime  @db.Timestamptz(6)
+  ended_at       DateTime? @db.Timestamptz(6)
+}
+
+model story_chain_lines {
+  id          Int      @id @default(autoincrement())
+  session_id  Int
+  guild_id    BigInt
+  user_id     BigInt
+  line_number Int
+  line_text   String
+  created_at  DateTime @db.Timestamptz(6)
+}
+
+model story_chain_sessions {
+  id                 Int       @id @default(autoincrement())
+  guild_id           BigInt
+  channel_id         BigInt?
+  is_active          Boolean
+  max_lines          Int
+  reminder_threshold Int
+  points_per_line    Int
+  current_line_count Int
+  reminder_sent      Boolean
+  last_user_id       BigInt?
+  started_at         DateTime  @db.Timestamptz(6)
+  ended_at           DateTime? @db.Timestamptz(6)
+}
+
+model trivia_answers {
+  id           Int      @id @default(autoincrement())
+  session_id   Int
+  round_number Int
+  user_id      BigInt
+  question_id  Int
+  answer_text  String   @db.VarChar(200)
+  is_correct   Boolean
+  answered_at  DateTime @db.Timestamptz(6)
+}
+
+model trivia_participants {
+  id             Int      @id @default(autoincrement())
+  session_id     Int
+  user_id        BigInt
+  score          Int
+  is_eliminated  Boolean
+  joined_at      DateTime @db.Timestamptz(6)
+  current_streak Int
+  guild_id       BigInt
+}
+
+model trivia_questions {
+  id            Int     @id @default(autoincrement())
+  category      String  @db.VarChar(100)
+  question_type String  @db.VarChar(50)
+  question      String  @db.VarChar(500)
+  answer        String  @db.VarChar(200)
+  option_a      String? @db.VarChar(200)
+  option_b      String? @db.VarChar(200)
+  option_c      String? @db.VarChar(200)
+  option_d      String? @db.VarChar(200)
+  difficulty    String? @db.VarChar(50)
+}
+
+model trivia_sessions {
+  id                         Int       @id @default(autoincrement())
+  is_active                  Boolean
+  has_started                Boolean
+  current_round              Int
+  current_question_id        Int?
+  started_at                 DateTime  @db.Timestamptz(6)
+  ended_at                   DateTime? @db.Timestamptz(6)
+  block_order                Json      @db.Json
+  current_block_index        Int
+  questions_in_current_block Int
+  current_modifier           String?   @db.VarChar(100)
+  modifier_value             Int?
+  guild_id                   BigInt
+}
+
+model two_truths_lie_sessions {
+  id                      Int       @id @default(autoincrement())
+  guild_id                BigInt
+  channel_id              BigInt?
+  is_active               Boolean
+  has_submission          Boolean
+  submitter_user_id       BigInt?
+  statement_1             String?   @db.VarChar(500)
+  statement_2             String?   @db.VarChar(500)
+  statement_3             String?   @db.VarChar(500)
+  displayed_1             String?   @db.VarChar(500)
+  displayed_2             String?   @db.VarChar(500)
+  displayed_3             String?   @db.VarChar(500)
+  lie_original_index      Int?
+  lie_displayed_index     Int?
+  guesser_reward_points   Int
+  submitter_reward_points Int
+  duration_seconds        Int
+  voting_message_id       BigInt?
+  started_at              DateTime  @db.Timestamptz(6)
+  ends_at                 DateTime  @db.Timestamptz(6)
+  ended_at                DateTime? @db.Timestamptz(6)
+}
+
+model two_truths_lie_votes {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  guild_id      BigInt
+  user_id       BigInt
+  guessed_index Int
+  created_at    DateTime @db.Timestamptz(6)
+}
+
+model user_achievements {
+  id              Int      @id @default(autoincrement())
+  user_id         BigInt
+  achievement_key String   @db.VarChar(100)
+  unlocked_at     DateTime @db.Timestamptz(6)
+}
+
+model user_activity_subscriptions {
+  id           Int      @id @default(autoincrement())
+  guild_id     BigInt
+  user_id      BigInt
+  activity_key String   @db.VarChar(80)
+  enabled      Boolean
+  created_at   DateTime @db.Timestamp(6)
+  updated_at   DateTime @db.Timestamp(6)
+
+  @@unique([guild_id, user_id, activity_key], map: "uq_user_activity_subscription")
+  @@index([activity_key], map: "ix_user_activity_subscriptions_activity_key")
+  @@index([guild_id], map: "ix_user_activity_subscriptions_guild_id")
+  @@index([user_id], map: "ix_user_activity_subscriptions_user_id")
+}
+
+model user_factions {
+  id                Int              @id @default(autoincrement())
+  guild_id          BigInt
+  user_id           BigInt
+  faction_id        Int
+  quiz_id           Int?
+  assignment_source String           @db.VarChar(50)
+  assigned_by       BigInt?
+  assigned_at       DateTime         @db.Timestamp(6)
+  factions          factions         @relation(fields: [faction_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  faction_quizzes   faction_quizzes? @relation(fields: [quiz_id], references: [id], onUpdate: NoAction)
+
+  @@index([faction_id], map: "ix_user_factions_faction_id")
+  @@index([guild_id], map: "ix_user_factions_guild_id")
+  @@index([user_id], map: "ix_user_factions_user_id")
+}
+
+model user_levels {
+  guild_id           BigInt
+  user_id            BigInt
+  level              Int
+  xp                 Int
+  total_xp           Int
+  messages_xp_count  Int
+  reactions_xp_count Int
+  voice_xp_count     Int
+  updated_at         DateTime @db.Timestamp(6)
+
+  @@id([guild_id, user_id])
+}
+
+model user_notification_preferences {
+  id                         Int      @id @default(autoincrement())
+  guild_id                   BigInt
+  user_id                    BigInt
+  event_reminders_enabled    Boolean
+  activity_alerts_enabled    Boolean
+  faction_alerts_enabled     Boolean
+  achievement_alerts_enabled Boolean
+  weekly_digest_enabled      Boolean
+  delivery_mode              String   @db.VarChar(20)
+  created_at                 DateTime @db.Timestamp(6)
+  updated_at                 DateTime @db.Timestamp(6)
+
+  @@unique([guild_id, user_id], map: "uq_user_notification_preferences_guild_user")
+  @@index([guild_id], map: "ix_user_notification_preferences_guild_id")
+  @@index([user_id], map: "ix_user_notification_preferences_user_id")
+}
+
+model user_points {
+  user_id  BigInt
+  guild_id BigInt
+  points   Int
+
+  @@id([user_id, guild_id])
+}
+
+model user_profiles {
+  id          Int      @id @default(autoincrement())
+  guild_id    BigInt
+  user_id     BigInt
+  age         Int?
+  birthday    String?  @db.VarChar(100)
+  personality String?  @db.VarChar(200)
+  bio         String?
+  created_at  DateTime @db.Timestamp(6)
+  updated_at  DateTime @db.Timestamp(6)
+}
+
+model user_stats {
+  user_id              BigInt  @id @default(autoincrement())
+  messages_sent        Int
+  events_joined        Int
+  events_participated  Int
+  mentions_done        Int
+  mentions_received    Int
+  reactions_done       Int
+  reactions_received   Int
+  points_earned        Int
+  first_message_sent   Boolean
+  first_event_attended Boolean
+  leaderboard_top10    Boolean
+  leaderboard_rank1    Boolean
+}
+
+model wyr_questions {
+  id         Int      @id @default(autoincrement())
+  option_a   String   @db.VarChar(300)
+  option_b   String   @db.VarChar(300)
+  created_at DateTime @db.Timestamptz(6)
+}
+
+model wyr_sessions {
+  id                      Int      @id @default(autoincrement())
+  guild_id                BigInt
+  is_active               Boolean
+  option_a                String   @db.VarChar(300)
+  option_b                String   @db.VarChar(300)
+  reward_points           Int
+  started_at              DateTime @db.Timestamptz(6)
+  ends_at                 DateTime @db.Timestamptz(6)
+  question_pool           Json?    @db.Json
+  current_question_number Int
+  is_series               Boolean
+}
+
+model wyr_votes {
+  id         Int      @id @default(autoincrement())
+  session_id Int
+  guild_id   BigInt
+  user_id    BigInt
+  choice     String   @db.VarChar(1)
+  created_at DateTime @db.Timestamptz(6)
+}
