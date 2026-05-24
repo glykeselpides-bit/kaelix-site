@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,15 +22,39 @@ export default async function ServerDashboardPage({
   ];
 
   const actions = [
-    "Settings",
-    "Events",
-    "Factions",
-    "Activities",
-    "Onboarding",
-    "Logs",
-    "Analytics",
-    "Subscription",
-  ];
+  {
+    title: "Settings",
+    href: `/servers/${guildId}/settings`,
+  },
+  {
+    title: "Events",
+    href: `/servers/${guildId}/events`,
+  },
+  {
+    title: "Factions",
+    href: `/servers/${guildId}/factions`,
+  },
+  {
+    title: "Activities",
+    href: `/servers/${guildId}/activities`,
+  },
+  {
+    title: "Onboarding",
+    href: `/servers/${guildId}/onboarding`,
+  },
+  {
+    title: "Logs",
+    href: `/servers/${guildId}/logs`,
+  },
+  {
+    title: "Analytics",
+    href: `/servers/${guildId}/analytics`,
+  },
+  {
+    title: "Subscription",
+    href: `/servers/${guildId}/subscription`,
+  },
+];
 
   return (
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
@@ -84,16 +109,17 @@ export default async function ServerDashboardPage({
 
             <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
               {actions.map((action) => (
-                <button
-                  key={action}
+                <Link
+                  href={action.href}
+                  key={action.title}
                   className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-left text-lg font-bold text-white transition hover:-translate-y-1 hover:border-blue-400/40 hover:bg-blue-500/10"
                 >
-                  {action}
+                  {action.title}
 
                   <p className="mt-3 text-sm font-normal leading-6 text-slate-400">
-                    {action} tools are coming soon.
+                    {action.title} tools are coming soon.
                   </p>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
