@@ -21,10 +21,6 @@ export default function Footer() {
           Contact
         </a>
       </div>
-      
-      <div className="mt-5 text-[10px] tracking-[0.25em] text-slate-500">
-        © 2026 Kaelix
-      </div> 
     </footer>
   );
 }
