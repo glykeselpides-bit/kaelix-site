@@ -5,6 +5,9 @@ import ActivitiesManager, { type ActivitySetting } from "./ActivitiesManager";
 import ActivitySessionsManager, {
   type SessionsPayload,
 } from "./ActivitySessionsManager";
+import TriviaQuestionsManager, {
+  type TriviaQuestion,
+} from "./TriviaQuestionsManager";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -19,6 +22,12 @@ type ActivitiesData = {
   };
   activities: ActivitySetting[];
   recentSessions?: unknown[];
+  warnings?: string[];
+};
+
+type TriviaData = {
+  questions: TriviaQuestion[];
+  total: number;
   warnings?: string[];
 };
 
@@ -39,6 +48,12 @@ const fallbackSessionsData: SessionsPayload = {
   activeSessions: [],
   recentSessions: [],
   sessions: [],
+};
+
+const fallbackTriviaData: TriviaData = {
+  questions: [],
+  total: 0,
+  warnings: ["Trivia questions could not be loaded."],
 };
 
 function normalizeActivitiesData(data: ActivitiesData | null): ActivitiesData {
@@ -91,19 +106,38 @@ function normalizeSessionsData(data: SessionsPayload | null): SessionsPayload {
   };
 }
 
+function normalizeTriviaData(data: TriviaData | null): TriviaData {
+  if (!data || typeof data !== "object") {
+    return fallbackTriviaData;
+  }
+
+  return {
+    questions: Array.isArray(data.questions) ? data.questions : [],
+    total:
+      typeof data.total === "number" && Number.isFinite(data.total)
+        ? data.total
+        : 0,
+    warnings: Array.isArray(data.warnings) ? data.warnings : [],
+  };
+}
+
 export default async function ActivitiesPage({
   params,
 }: {
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = await params;
-  const [data, sessionsData] = await Promise.all([
+  const [data, sessionsData, triviaData] = await Promise.all([
     fetchServerSection<ActivitiesData>(guildId, "activities").then(
       normalizeActivitiesData
     ),
     fetchServerSection<SessionsPayload>(guildId, "activities/sessions").then(
       normalizeSessionsData
     ),
+    fetchServerSection<TriviaData>(
+      guildId,
+      "activities/trivia?includeInactive=true"
+    ).then(normalizeTriviaData),
   ]);
 
   return (
@@ -145,26 +179,7 @@ export default async function ActivitiesPage({
           initialPayload={sessionsData}
         />
 
-        <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-300">
-            Content
-          </p>
-          <h2 className="mt-3 text-2xl font-bold text-white">Coming next</h2>
-          <div className="mt-5 flex flex-wrap gap-3">
-            {["Questions", "Riddles", "Prompts", "Word lists"].map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-sm font-semibold text-slate-300"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-          <p className="mt-5 max-w-3xl text-sm leading-6 text-slate-400">
-            Manage activity content such as trivia questions, riddles, prompts,
-            and word lists from here.
-          </p>
-        </section>
+        <TriviaQuestionsManager guildId={guildId} initialPayload={triviaData} />
       </div>
     </ServerSectionPlaceholder>
   );

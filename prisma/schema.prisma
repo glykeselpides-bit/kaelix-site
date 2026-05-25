@@ -849,6 +849,7 @@ model trivia_participants {
 
 model trivia_questions {
   id            Int     @id @default(autoincrement())
+  guild_id      BigInt?
   category      String  @db.VarChar(100)
   question_type String  @db.VarChar(50)
   question      String  @db.VarChar(500)
@@ -858,6 +859,13 @@ model trivia_questions {
   option_c      String? @db.VarChar(200)
   option_d      String? @db.VarChar(200)
   difficulty    String? @db.VarChar(50)
+  reward_points Int?
+  is_active     Boolean @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([guild_id], map: "ix_trivia_questions_guild_id")
+  @@index([guild_id, is_active], map: "ix_trivia_questions_guild_active")
 }
 
 model trivia_sessions {
