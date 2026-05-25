@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Dropdown from "./Dropdown";
 
 type NavbarProps = {
@@ -13,7 +13,22 @@ const inviteUrl =
 
 export default function Navbar({ variant = "page" }: NavbarProps) {
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const isHome = variant === "home";
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-black/35 backdrop-blur-xl">
@@ -54,7 +69,7 @@ export default function Navbar({ variant = "page" }: NavbarProps) {
           </div>
         )}
 
-        <div className="relative flex items-center gap-4">
+        <div ref={menuRef} className="relative flex items-center gap-4">
           <a
             href={isHome ? inviteUrl : communityUrl}
             target="_blank"
