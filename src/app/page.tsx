@@ -1,9 +1,28 @@
+"use client";
+
 import Footer from "@/components/Footer";
 import Dropdown from "@/components/Dropdown";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const inviteUrl =
     "https://discord.com/oauth2/authorize?client_id=1506753052173139968&permissions=8&integration_type=0&scope=bot+applications.commands";
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
@@ -38,13 +57,17 @@ export default function Home() {
                 Add to Discord
               </a>
 
-              <details className="relative">
-                <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl text-slate-200 transition hover:border-blue-400/40 hover:bg-blue-500/10 hover:text-white">
+              <div ref={menuRef} className="relative">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl text-slate-200 transition hover:border-blue-400/40 hover:bg-blue-500/10 hover:text-white"
+                  aria-label="Open menu"
+                >
                   ☰
-                </summary>
+                </button>
 
-                <Dropdown />
-              </details>
+                {menuOpen && <Dropdown />}
+              </div>
             </div>
           </div>
         </nav>
