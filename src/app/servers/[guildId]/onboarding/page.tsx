@@ -1,11 +1,22 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
-import { LoadError, MetricGrid } from "@/components/ServerReadOnlySection";
 import { fetchServerSection } from "@/lib/dashboardFetch";
+import OnboardingManager, {
+  type OnboardingFaction,
+  type OnboardingQuiz,
+  type OnboardingSettings,
+  type SkippedOnboardingField,
+} from "./OnboardingManager";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const revalidate = 0;
 
 type OnboardingData = {
+  found?: boolean;
+  onboarding: OnboardingSettings | null;
+  quizzes: OnboardingQuiz[];
+  factions: OnboardingFaction[];
+  skippedFields: SkippedOnboardingField[];
   metrics: {
     onboardingEnabled: boolean;
     activeQuizCount: number;
@@ -21,7 +32,7 @@ export default async function OnboardingPage({
 }) {
   const { guildId } = await params;
   const data = await fetchServerSection<OnboardingData>(guildId, "onboarding");
-  const metrics = data?.metrics;
+  const onboarding = data?.found === true ? data.onboarding : null;
 
   return (
     <ServerSectionPlaceholder
@@ -29,24 +40,14 @@ export default async function OnboardingPage({
       title="Onboarding"
       description="Manage onboarding processes, tutorials, and user initiation workflows."
     >
-      {metrics ? (
-        <MetricGrid
-          metrics={[
-            {
-              label: "Onboarding",
-              value: metrics.onboardingEnabled ? "Enabled" : "Disabled",
-            },
-            { label: "Active Quizzes", value: metrics.activeQuizCount },
-            {
-              label: "Completed Sessions",
-              value: metrics.completedSessionsCount,
-            },
-            { label: "Assigned Users", value: metrics.assignedUsersCount },
-          ]}
-        />
-      ) : (
-        <LoadError label="server onboarding" />
-      )}
+      <OnboardingManager
+        guildId={guildId}
+        initialOnboarding={onboarding}
+        quizzes={data?.quizzes ?? []}
+        factions={data?.factions ?? []}
+        skippedFields={data?.skippedFields ?? []}
+        loadError={!onboarding}
+      />
     </ServerSectionPlaceholder>
   );
 }
