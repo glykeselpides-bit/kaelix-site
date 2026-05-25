@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { invalidGuildIdResponse, parseGuildId } from "@/lib/dashboardApi";
+import {
+  formatBigInt,
+  invalidGuildIdResponse,
+  parseGuildId,
+} from "@/lib/dashboardApi";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
@@ -17,6 +21,11 @@ type SettingsResponse = {
   notifications_enabled: boolean;
   default_timezone: string;
   event_reminders_enabled: boolean;
+  welcome_channel_id: string | null;
+  digest_channel_id: string | null;
+  logs_channel_id: string | null;
+  events_channel_id: string | null;
+  activity_channel_id: string | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -34,6 +43,8 @@ function toSettingsResponse(config: {
   send_dm_notifications: boolean;
   welcome_channel_id: bigint | null;
   event_reminder_channel_id: bigint | null;
+  admin_log_channel_id: bigint | null;
+  weekly_summary_channel_id: bigint | null;
   extra_settings: Prisma.JsonValue;
 }): SettingsResponse {
   const extraSettings = getExtraSettings(config.extra_settings);
@@ -55,7 +66,44 @@ function toSettingsResponse(config: {
       typeof extraSettings.event_reminders_enabled === "boolean"
         ? extraSettings.event_reminders_enabled
         : Boolean(config.event_reminder_channel_id),
+    welcome_channel_id: formatBigInt(config.welcome_channel_id),
+    digest_channel_id: formatBigInt(config.weekly_summary_channel_id),
+    logs_channel_id: formatBigInt(config.admin_log_channel_id),
+    events_channel_id: formatBigInt(config.event_reminder_channel_id),
+    activity_channel_id:
+      typeof extraSettings.activity_channel_id === "string" &&
+      extraSettings.activity_channel_id
+        ? extraSettings.activity_channel_id
+        : null,
   };
+}
+
+function parseOptionalSnowflake(
+  value: unknown,
+  fieldName: string,
+  errors: string[]
+) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    errors.push(`${fieldName} must be a Discord snowflake string.`);
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (!/^\d+$/.test(trimmed)) {
+    errors.push(`${fieldName} must be a Discord snowflake string.`);
+    return undefined;
+  }
+
+  return BigInt(trimmed);
 }
 
 function validateSettingsPatch(body: unknown) {
@@ -64,7 +112,7 @@ function validateSettingsPatch(body: unknown) {
   }
 
   const data: Prisma.guild_configUpdateInput = {};
-  const extraSettingsPatch: Record<string, boolean | string> = {};
+  const extraSettingsPatch: Record<string, boolean | string | null> = {};
   const errors: string[] = [];
 
   if ("weekly_digest_enabled" in body) {
@@ -142,6 +190,66 @@ function validateSettingsPatch(body: unknown) {
         body.event_reminders_enabled;
     } else {
       errors.push("event_reminders_enabled must be a boolean.");
+    }
+  }
+
+  if ("welcome_channel_id" in body) {
+    const channelId = parseOptionalSnowflake(
+      body.welcome_channel_id,
+      "welcome_channel_id",
+      errors
+    );
+
+    if (channelId !== undefined) {
+      data.welcome_channel_id = channelId;
+    }
+  }
+
+  if ("digest_channel_id" in body) {
+    const channelId = parseOptionalSnowflake(
+      body.digest_channel_id,
+      "digest_channel_id",
+      errors
+    );
+
+    if (channelId !== undefined) {
+      data.weekly_summary_channel_id = channelId;
+    }
+  }
+
+  if ("logs_channel_id" in body) {
+    const channelId = parseOptionalSnowflake(
+      body.logs_channel_id,
+      "logs_channel_id",
+      errors
+    );
+
+    if (channelId !== undefined) {
+      data.admin_log_channel_id = channelId;
+    }
+  }
+
+  if ("events_channel_id" in body) {
+    const channelId = parseOptionalSnowflake(
+      body.events_channel_id,
+      "events_channel_id",
+      errors
+    );
+
+    if (channelId !== undefined) {
+      data.event_reminder_channel_id = channelId;
+    }
+  }
+
+  if ("activity_channel_id" in body) {
+    const channelId = parseOptionalSnowflake(
+      body.activity_channel_id,
+      "activity_channel_id",
+      errors
+    );
+
+    if (channelId !== undefined) {
+      extraSettingsPatch.activity_channel_id = channelId?.toString() ?? null;
     }
   }
 

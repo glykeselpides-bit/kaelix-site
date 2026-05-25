@@ -58,6 +58,34 @@ function normalizeOptionalString(value: unknown) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function parseOptionalBigInt(
+  value: unknown,
+  fieldName: string,
+  errors: string[]
+) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    errors.push(`${fieldName} must be a Discord snowflake string.`);
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (!/^\d+$/.test(trimmed)) {
+    errors.push(`${fieldName} must be a Discord snowflake string.`);
+    return undefined;
+  }
+
+  return BigInt(trimmed);
+}
+
 function validateFactionId(body: unknown) {
   if (!isRecord(body)) {
     return { error: "Request body must be a JSON object." };
@@ -137,6 +165,14 @@ function validateFactionCreate(body: unknown) {
     data.color = color;
   }
 
+  if ("roleId" in body) {
+    const roleId = parseOptionalBigInt(body.roleId, "roleId", errors);
+
+    if (roleId !== undefined) {
+      data.role_id = roleId;
+    }
+  }
+
   if ("isActive" in body) {
     if (typeof body.isActive === "boolean") {
       data.is_active = body.isActive;
@@ -209,6 +245,14 @@ function validateFactionPatch(body: unknown) {
       errors.push("color must be 20 characters or fewer.");
     } else {
       data.color = color;
+    }
+  }
+
+  if ("roleId" in bodyRecord) {
+    const roleId = parseOptionalBigInt(bodyRecord.roleId, "roleId", errors);
+
+    if (roleId !== undefined) {
+      data.role_id = roleId;
     }
   }
 

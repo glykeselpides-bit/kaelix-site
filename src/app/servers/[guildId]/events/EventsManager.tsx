@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import {
+  DiscordChannelSelect,
+  type DiscordChannel,
+  useDiscordChannels,
+} from "@/components/DiscordResourceSelects";
 
 export type EventItem = {
   id: number;
@@ -13,12 +18,6 @@ export type EventItem = {
   rewardPoints: number;
   recurrence: string;
   createdAt: string | null;
-};
-
-type DiscordChannel = {
-  id: string;
-  name: string;
-  type: string;
 };
 
 type EventDraft = {
@@ -378,24 +377,20 @@ function SelectInput({
 function EventFields({
   draft,
   disabled,
-  channels,
-  channelsLoading,
-  channelsError,
+  guildId,
+  channelsState,
   showStatus,
   yearOptions,
   onChange,
 }: {
   draft: EventDraft;
   disabled: boolean;
-  channels: DiscordChannel[];
-  channelsLoading: boolean;
-  channelsError: string | null;
+  guildId: string;
+  channelsState: ReturnType<typeof useDiscordChannels>;
   showStatus: boolean;
   yearOptions: string[];
   onChange: (draft: EventDraft) => void;
 }) {
-  const useManualChannel = channelsError !== null || channels.length === 0;
-
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <FieldShell label="Event name">
@@ -409,39 +404,15 @@ function EventFields({
       </FieldShell>
 
       <FieldShell label="Channel">
-        {useManualChannel ? (
-          <>
-            <TextInput
-              value={draft.channelId}
-              disabled={disabled}
-              placeholder="123456789012345678"
-              onChange={(channelId) => onChange({ ...draft, channelId })}
-            />
-            <span className="mt-2 block text-xs text-amber-200">
-              {channelsError ?? "No eligible Discord channels were returned."}
-            </span>
-          </>
-        ) : (
-          <>
-            <SelectInput
-              value={draft.channelId}
-              disabled={disabled || channelsLoading}
-              onChange={(channelId) => onChange({ ...draft, channelId })}
-            >
-              <option value="">
-                {channelsLoading ? "Loading channels..." : "Choose a channel"}
-              </option>
-              {channels.map((channel) => (
-                <option key={channel.id} value={channel.id}>
-                  #{channel.name}
-                </option>
-              ))}
-            </SelectInput>
-            <span className="mt-2 block text-xs text-slate-500">
-              Text, announcement, and forum channels are shown.
-            </span>
-          </>
-        )}
+        <DiscordChannelSelect
+          guildId={guildId}
+          channelsState={channelsState}
+          value={draft.channelId}
+          disabled={disabled}
+          label=""
+          autoSelectFirst
+          onChange={(channelId) => onChange({ ...draft, channelId })}
+        />
       </FieldShell>
 
       <FieldShell label="Date">
@@ -569,9 +540,8 @@ export default function EventsManager({
   loadError: boolean;
 }) {
   const [events, setEvents] = useState(initialEvents);
-  const [channels, setChannels] = useState<DiscordChannel[]>([]);
-  const [channelsLoading, setChannelsLoading] = useState(true);
-  const [channelsError, setChannelsError] = useState<string | null>(null);
+  const channelsState = useDiscordChannels(guildId);
+  const { items: channels, isLoading: channelsLoading } = channelsState;
   const [createDraft, setCreateDraft] = useState(emptyDraft);
   const [editing, setEditing] = useState<Record<number, EventDraft>>(() =>
     Object.fromEntries(initialEvents.map((event) => [event.id, toDraft(event)]))
@@ -597,57 +567,6 @@ export default function EventsManager({
       Array.from({ length: 3 }, (_, index) => String(currentYear + index)),
     [currentYear]
   );
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadChannels() {
-      setChannelsLoading(true);
-      setChannelsError(null);
-
-      try {
-        const response = await fetch(
-          `/api/servers/${encodeURIComponent(guildId)}/discord/channels`,
-          { cache: "no-store" }
-        );
-        const data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(
-            getErrorMessage(data, "Discord channels could not be loaded.")
-          );
-        }
-
-        const nextChannels = Array.isArray(data?.channels) ? data.channels : [];
-
-        if (isMounted) {
-          setChannels(nextChannels);
-          setCreateDraft((current) => ({
-            ...current,
-            channelId: current.channelId || nextChannels[0]?.id || "",
-          }));
-        }
-      } catch (loadError) {
-        if (isMounted) {
-          setChannelsError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Discord channels could not be loaded."
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setChannelsLoading(false);
-        }
-      }
-    }
-
-    loadChannels();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [guildId]);
 
   async function refreshEvents() {
     const response = await fetch(
@@ -828,9 +747,8 @@ export default function EventsManager({
           <EventFields
             draft={createDraft}
             disabled={isBusy}
-            channels={channels}
-            channelsLoading={channelsLoading}
-            channelsError={channelsError}
+            guildId={guildId}
+            channelsState={channelsState}
             showStatus={false}
             yearOptions={yearOptions}
             onChange={setCreateDraft}
@@ -932,9 +850,8 @@ export default function EventsManager({
                     <EventFields
                       draft={draft}
                       disabled={isBusy}
-                      channels={channels}
-                      channelsLoading={channelsLoading}
-                      channelsError={channelsError}
+                      guildId={guildId}
+                      channelsState={channelsState}
                       showStatus
                       yearOptions={yearOptions}
                       onChange={(nextDraft) =>

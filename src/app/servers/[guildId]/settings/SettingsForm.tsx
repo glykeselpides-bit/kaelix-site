@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  DiscordChannelSelect,
+  useDiscordChannels,
+} from "@/components/DiscordResourceSelects";
 
 export type EditableServerSettings = {
   weekly_digest_enabled: boolean;
@@ -10,6 +14,11 @@ export type EditableServerSettings = {
   notifications_enabled: boolean;
   default_timezone: string;
   event_reminders_enabled: boolean;
+  welcome_channel_id: string;
+  digest_channel_id: string;
+  logs_channel_id: string;
+  events_channel_id: string;
+  activity_channel_id: string;
 };
 
 const defaultSettings: EditableServerSettings = {
@@ -20,6 +29,11 @@ const defaultSettings: EditableServerSettings = {
   notifications_enabled: true,
   default_timezone: "UTC",
   event_reminders_enabled: true,
+  welcome_channel_id: "",
+  digest_channel_id: "",
+  logs_channel_id: "",
+  events_channel_id: "",
+  activity_channel_id: "",
 };
 
 const digestDays = [
@@ -65,6 +79,26 @@ function normalizeSettings(
       typeof settings?.event_reminders_enabled === "boolean"
         ? settings.event_reminders_enabled
         : defaultSettings.event_reminders_enabled,
+    welcome_channel_id:
+      typeof settings?.welcome_channel_id === "string"
+        ? settings.welcome_channel_id
+        : defaultSettings.welcome_channel_id,
+    digest_channel_id:
+      typeof settings?.digest_channel_id === "string"
+        ? settings.digest_channel_id
+        : defaultSettings.digest_channel_id,
+    logs_channel_id:
+      typeof settings?.logs_channel_id === "string"
+        ? settings.logs_channel_id
+        : defaultSettings.logs_channel_id,
+    events_channel_id:
+      typeof settings?.events_channel_id === "string"
+        ? settings.events_channel_id
+        : defaultSettings.events_channel_id,
+    activity_channel_id:
+      typeof settings?.activity_channel_id === "string"
+        ? settings.activity_channel_id
+        : defaultSettings.activity_channel_id,
   };
 }
 
@@ -129,6 +163,7 @@ export default function SettingsForm({
     loadError ? "Settings could not be loaded. Safe defaults are shown." : null
   );
   const [success, setSuccess] = useState<string | null>(null);
+  const channelsState = useDiscordChannels(guildId);
 
   async function saveSettings() {
     setIsSaving(true);
@@ -146,6 +181,11 @@ export default function SettingsForm({
           body: JSON.stringify({
             ...settings,
             default_timezone: settings.default_timezone.trim(),
+            welcome_channel_id: settings.welcome_channel_id.trim(),
+            digest_channel_id: settings.digest_channel_id.trim(),
+            logs_channel_id: settings.logs_channel_id.trim(),
+            events_channel_id: settings.events_channel_id.trim(),
+            activity_channel_id: settings.activity_channel_id.trim(),
           }),
         }
       );
@@ -318,6 +358,69 @@ export default function SettingsForm({
           </div>
         </section>
       </div>
+
+      <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-300">
+          Discord Channels
+        </p>
+
+        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          <DiscordChannelSelect
+            guildId={guildId}
+            channelsState={channelsState}
+            label="Welcome channel"
+            value={settings.welcome_channel_id}
+            disabled={isSaving}
+            onChange={(welcome_channel_id) =>
+              setSettings((current) => ({ ...current, welcome_channel_id }))
+            }
+          />
+
+          <DiscordChannelSelect
+            guildId={guildId}
+            channelsState={channelsState}
+            label="Digest channel"
+            value={settings.digest_channel_id}
+            disabled={isSaving}
+            onChange={(digest_channel_id) =>
+              setSettings((current) => ({ ...current, digest_channel_id }))
+            }
+          />
+
+          <DiscordChannelSelect
+            guildId={guildId}
+            channelsState={channelsState}
+            label="Logs channel"
+            value={settings.logs_channel_id}
+            disabled={isSaving}
+            onChange={(logs_channel_id) =>
+              setSettings((current) => ({ ...current, logs_channel_id }))
+            }
+          />
+
+          <DiscordChannelSelect
+            guildId={guildId}
+            channelsState={channelsState}
+            label="Events channel"
+            value={settings.events_channel_id}
+            disabled={isSaving}
+            onChange={(events_channel_id) =>
+              setSettings((current) => ({ ...current, events_channel_id }))
+            }
+          />
+
+          <DiscordChannelSelect
+            guildId={guildId}
+            channelsState={channelsState}
+            label="Activity channel"
+            value={settings.activity_channel_id}
+            disabled={isSaving}
+            onChange={(activity_channel_id) =>
+              setSettings((current) => ({ ...current, activity_channel_id }))
+            }
+          />
+        </div>
+      </section>
 
       <div className="flex flex-wrap items-center gap-4">
         <button

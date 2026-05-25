@@ -1,6 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  DiscordRoleSelect,
+  type DiscordRole,
+  useDiscordRoles,
+} from "@/components/DiscordResourceSelects";
 
 export type FactionItem = {
   id: number;
@@ -22,6 +27,7 @@ type FactionDraft = {
   description: string;
   emoji: string;
   color: string;
+  roleId: string;
   isActive: boolean;
 };
 
@@ -31,6 +37,7 @@ const emptyDraft: FactionDraft = {
   description: "",
   emoji: "",
   color: "",
+  roleId: "",
   isActive: true,
 };
 
@@ -41,6 +48,7 @@ function toDraft(faction: FactionItem): FactionDraft {
     description: faction.description ?? "",
     emoji: faction.emoji ?? "",
     color: faction.color ?? "",
+    roleId: faction.roleId ?? "",
     isActive: faction.isActive,
   };
 }
@@ -70,8 +78,18 @@ function normalizeDraft(draft: FactionDraft) {
     description: draft.description.trim() || null,
     emoji: draft.emoji.trim() || null,
     color: draft.color.trim() || null,
+    roleId: draft.roleId.trim() || null,
     isActive: draft.isActive,
   };
+}
+
+function getRoleLabel(roles: DiscordRole[], roleId: string | null) {
+  if (!roleId) {
+    return "No linked role";
+  }
+
+  const role = roles.find((item) => item.id === roleId);
+  return role ? `@${role.name}` : roleId;
 }
 
 function TextField({
@@ -154,6 +172,8 @@ export default function FactionsManager({
   loadError: boolean;
 }) {
   const [factions, setFactions] = useState(initialFactions);
+  const rolesState = useDiscordRoles(guildId);
+  const { items: roles } = rolesState;
   const [createDraft, setCreateDraft] = useState(emptyDraft);
   const [editing, setEditing] = useState<Record<number, FactionDraft>>(() =>
     Object.fromEntries(
@@ -253,6 +273,7 @@ export default function FactionsManager({
             description: draft.description.trim() || null,
             emoji: draft.emoji.trim() || null,
             color: draft.color.trim() || null,
+            roleId: draft.roleId.trim() || null,
             isActive: draft.isActive,
           }),
         }
@@ -385,6 +406,17 @@ export default function FactionsManager({
             }
           />
 
+          <DiscordRoleSelect
+            guildId={guildId}
+            rolesState={rolesState}
+            label="Linked Discord role"
+            value={createDraft.roleId}
+            disabled={isBusy}
+            onChange={(roleId) =>
+              setCreateDraft((current) => ({ ...current, roleId }))
+            }
+          />
+
           <label className="block lg:col-span-2">
             <span className="text-sm font-semibold text-slate-200">
               Description
@@ -454,6 +486,9 @@ export default function FactionsManager({
                       <p className="mt-1 text-sm text-slate-500">
                         {faction.key} / {faction.status}
                       </p>
+                      <p className="mt-1 text-sm text-slate-400">
+                        {getRoleLabel(roles, faction.roleId)}
+                      </p>
                     </div>
                   </div>
 
@@ -504,6 +539,20 @@ export default function FactionsManager({
                       setEditing((current) => ({
                         ...current,
                         [faction.id]: { ...draft, color },
+                      }))
+                    }
+                  />
+
+                  <DiscordRoleSelect
+                    guildId={guildId}
+                    rolesState={rolesState}
+                    label="Linked Discord role"
+                    value={draft.roleId}
+                    disabled={isBusy}
+                    onChange={(roleId) =>
+                      setEditing((current) => ({
+                        ...current,
+                        [faction.id]: { ...draft, roleId },
                       }))
                     }
                   />
