@@ -2,9 +2,8 @@ import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
 import { fetchServerSection } from "@/lib/dashboardFetch";
 import OnboardingManager, {
   type OnboardingFaction,
-  type OnboardingQuiz,
+  type OnboardingQuizQuestion,
   type OnboardingSettings,
-  type SkippedOnboardingField,
 } from "./OnboardingManager";
 
 export const dynamic = "force-dynamic";
@@ -13,13 +12,12 @@ export const revalidate = 0;
 
 type OnboardingData = {
   found?: boolean;
-  onboarding: OnboardingSettings | null;
-  quizzes: OnboardingQuiz[];
+  settings: OnboardingSettings | null;
+  questions: OnboardingQuizQuestion[];
   factions: OnboardingFaction[];
-  skippedFields: SkippedOnboardingField[];
   metrics: {
     onboardingEnabled: boolean;
-    activeQuizCount: number;
+    activeQuestionCount: number;
     completedSessionsCount: number;
     assignedUsersCount: number;
   };
@@ -32,7 +30,7 @@ export default async function OnboardingPage({
 }) {
   const { guildId } = await params;
   const data = await fetchServerSection<OnboardingData>(guildId, "onboarding");
-  const onboarding = data?.found === true ? data.onboarding : null;
+  const settings = data?.found === true ? data.settings : null;
 
   return (
     <ServerSectionPlaceholder
@@ -42,11 +40,10 @@ export default async function OnboardingPage({
     >
       <OnboardingManager
         guildId={guildId}
-        initialOnboarding={onboarding}
-        quizzes={data?.quizzes ?? []}
+        initialSettings={settings}
+        initialQuestions={data?.questions ?? []}
         factions={data?.factions ?? []}
-        skippedFields={data?.skippedFields ?? []}
-        loadError={!onboarding}
+        loadError={!settings}
       />
     </ServerSectionPlaceholder>
   );

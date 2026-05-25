@@ -10,12 +10,17 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const revalidate = 0;
 
-type GuildConfigRecord = {
+type OnboardingSettingsRecord = {
   onboarding_enabled: boolean;
-  active_quiz_id: bigint | null;
-  allow_retake: boolean;
-  result_visibility: string;
-  welcome_channel_id: bigint | null;
+  welcome_channel_id: string | null;
+  result_channel_id: string | null;
+  allow_retakes: boolean;
+  show_result_publicly: boolean;
+  auto_assign_faction_role: boolean;
+  onboarding_title: string | null;
+  onboarding_body: string | null;
+  quiz_enabled: boolean;
+  custom_factions_enabled: boolean;
 };
 
 type FactionRecord = {
@@ -26,35 +31,38 @@ type FactionRecord = {
   is_active: boolean;
 };
 
-const SKIPPED_FIELDS = [
-  {
-    field: "resultAnnouncementChannelId",
-    reason: "No dedicated onboarding result announcement channel exists in schema.",
-  },
-  {
-    field: "autoAssignFactionRole",
-    reason: "Faction role links exist, but no onboarding auto-assign toggle exists in schema.",
-  },
-  {
-    field: "onboardingTitle",
-    reason: "No onboarding title field exists in schema.",
-  },
-  {
-    field: "onboardingBody",
-    reason: "No onboarding body field exists in schema.",
-  },
-  {
-    field: "quizEnabled",
-    reason: "No separate quiz enabled field exists in schema.",
-  },
-  {
-    field: "customFactionsEnabled",
-    reason: "No custom factions enabled field exists in schema.",
-  },
-];
+type QuizOptionRecord = {
+  id: number;
+  label: string;
+  faction_id: number | null;
+  weight: number;
+  position: number;
+  is_active: boolean;
+};
+
+type QuizQuestionRecord = {
+  id: number;
+  question: string;
+  position: number;
+  is_active: boolean;
+  faction_quiz_options: QuizOptionRecord[];
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function normalizeOptionalString(value: unknown) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 function parseOptionalSnowflake(
@@ -62,65 +70,37 @@ function parseOptionalSnowflake(
   fieldName: string,
   errors: string[]
 ) {
-  if (value === null || value === undefined) {
-    return null;
-  }
+  const normalized = normalizeOptionalString(value);
 
-  if (typeof value !== "string") {
+  if (normalized === undefined) {
     errors.push(`${fieldName} must be a Discord snowflake string.`);
     return undefined;
   }
 
-  const trimmed = value.trim();
-
-  if (!trimmed) {
+  if (normalized === null) {
     return null;
   }
 
-  if (!/^\d+$/.test(trimmed)) {
+  if (!/^\d+$/.test(normalized)) {
     errors.push(`${fieldName} must be a Discord snowflake string.`);
     return undefined;
   }
 
-  return BigInt(trimmed);
+  return normalized;
 }
 
-function parseOptionalId(value: unknown, fieldName: string, errors: string[]) {
-  if (value === null || value === undefined) {
-    return null;
-  }
-
-  if (typeof value === "number" && Number.isInteger(value) && value > 0) {
-    return BigInt(value);
-  }
-
-  if (typeof value !== "string") {
-    errors.push(`${fieldName} must be a positive integer string.`);
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-
-  if (!trimmed) {
-    return null;
-  }
-
-  if (!/^\d+$/.test(trimmed)) {
-    errors.push(`${fieldName} must be a positive integer string.`);
-    return undefined;
-  }
-
-  return BigInt(trimmed);
-}
-
-function toOnboardingResponse(config: GuildConfigRecord) {
+function toSettingsResponse(settings: OnboardingSettingsRecord) {
   return {
-    onboardingEnabled: config.onboarding_enabled,
-    activeQuizId: formatBigInt(config.active_quiz_id),
-    allowRetake: config.allow_retake,
-    resultVisibility: config.result_visibility,
-    showFactionResultPublicly: config.result_visibility === "public",
-    welcomeChannelId: formatBigInt(config.welcome_channel_id),
+    onboardingEnabled: settings.onboarding_enabled,
+    welcomeChannelId: settings.welcome_channel_id,
+    resultChannelId: settings.result_channel_id,
+    allowRetakes: settings.allow_retakes,
+    showResultPublicly: settings.show_result_publicly,
+    autoAssignFactionRole: settings.auto_assign_faction_role,
+    onboardingTitle: settings.onboarding_title,
+    onboardingBody: settings.onboarding_body,
+    quizEnabled: settings.quiz_enabled,
+    customFactionsEnabled: settings.custom_factions_enabled,
   };
 }
 
@@ -136,7 +116,24 @@ function toFactionResponse(faction: FactionRecord) {
   };
 }
 
-function validateOnboardingPatch(body: unknown) {
+function toQuestionResponse(question: QuizQuestionRecord) {
+  return {
+    id: question.id,
+    question: question.question,
+    position: question.position,
+    isActive: question.is_active,
+    options: question.faction_quiz_options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      factionId: option.faction_id,
+      weight: option.weight,
+      position: option.position,
+      isActive: option.is_active,
+    })),
+  };
+}
+
+function validateSettingsPatch(body: unknown) {
   if (!isRecord(body)) {
     return { error: "Request body must be a JSON object." };
   }
@@ -144,85 +141,120 @@ function validateOnboardingPatch(body: unknown) {
   const errors: string[] = [];
   const data: Partial<{
     onboarding_enabled: boolean;
-    active_quiz_id: bigint | null;
-    allow_retake: boolean;
-    result_visibility: string;
-    welcome_channel_id: bigint | null;
+    welcome_channel_id: string | null;
+    result_channel_id: string | null;
+    allow_retakes: boolean;
+    show_result_publicly: boolean;
+    auto_assign_faction_role: boolean;
+    onboarding_title: string | null;
+    onboarding_body: string | null;
+    quiz_enabled: boolean;
+    custom_factions_enabled: boolean;
   }> = {};
 
-  if ("onboardingEnabled" in body) {
-    if (typeof body.onboardingEnabled === "boolean") {
-      data.onboarding_enabled = body.onboardingEnabled;
-    } else {
-      errors.push("onboardingEnabled must be a boolean.");
-    }
-  }
+  const booleanFields = [
+    ["onboardingEnabled", "onboarding_enabled"],
+    ["allowRetakes", "allow_retakes"],
+    ["showResultPublicly", "show_result_publicly"],
+    ["autoAssignFactionRole", "auto_assign_faction_role"],
+    ["quizEnabled", "quiz_enabled"],
+    ["customFactionsEnabled", "custom_factions_enabled"],
+  ] as const;
 
-  if ("activeQuizId" in body) {
-    const activeQuizId = parseOptionalId(
-      body.activeQuizId,
-      "activeQuizId",
-      errors
-    );
-
-    if (activeQuizId !== undefined) {
-      data.active_quiz_id = activeQuizId;
-    }
-  }
-
-  if ("allowRetake" in body) {
-    if (typeof body.allowRetake === "boolean") {
-      data.allow_retake = body.allowRetake;
-    } else {
-      errors.push("allowRetake must be a boolean.");
-    }
-  }
-
-  if ("showFactionResultPublicly" in body) {
-    if (typeof body.showFactionResultPublicly === "boolean") {
-      data.result_visibility = body.showFactionResultPublicly
-        ? "public"
-        : "private";
-    } else {
-      errors.push("showFactionResultPublicly must be a boolean.");
-    }
-  }
-
-  if ("resultVisibility" in body) {
-    if (typeof body.resultVisibility === "string") {
-      const resultVisibility = body.resultVisibility.trim();
-
-      if (resultVisibility.length > 0 && resultVisibility.length <= 20) {
-        data.result_visibility = resultVisibility;
+  for (const [requestKey, dbKey] of booleanFields) {
+    if (requestKey in body) {
+      if (typeof body[requestKey] === "boolean") {
+        data[dbKey] = body[requestKey];
       } else {
-        errors.push("resultVisibility must be 1-20 characters.");
+        errors.push(`${requestKey} must be a boolean.`);
       }
-    } else {
-      errors.push("resultVisibility must be a string.");
     }
   }
 
   if ("welcomeChannelId" in body) {
-    const welcomeChannelId = parseOptionalSnowflake(
+    const channelId = parseOptionalSnowflake(
       body.welcomeChannelId,
       "welcomeChannelId",
       errors
     );
 
-    if (welcomeChannelId !== undefined) {
-      data.welcome_channel_id = welcomeChannelId;
+    if (channelId !== undefined) {
+      data.welcome_channel_id = channelId;
+    }
+  }
+
+  if ("resultChannelId" in body) {
+    const channelId = parseOptionalSnowflake(
+      body.resultChannelId,
+      "resultChannelId",
+      errors
+    );
+
+    if (channelId !== undefined) {
+      data.result_channel_id = channelId;
+    }
+  }
+
+  if ("onboardingTitle" in body) {
+    const title = normalizeOptionalString(body.onboardingTitle);
+
+    if (title === undefined || (title && title.length > 200)) {
+      errors.push("onboardingTitle must be 200 characters or fewer.");
+    } else {
+      data.onboarding_title = title;
+    }
+  }
+
+  if ("onboardingBody" in body) {
+    const onboardingBody = normalizeOptionalString(body.onboardingBody);
+
+    if (onboardingBody === undefined) {
+      errors.push("onboardingBody must be a string.");
+    } else {
+      data.onboarding_body = onboardingBody;
     }
   }
 
   if (errors.length > 0) {
-    return { error: "Invalid onboarding payload.", details: errors };
+    return { error: "Invalid onboarding settings payload.", details: errors };
   }
 
   if (Object.keys(data).length === 0) {
-    return { error: "No supported onboarding fields were provided." };
+    return { error: "No supported onboarding settings were provided." };
   }
 
   return { data };
+}
+
+async function getOrCreateSettings(guildId: bigint) {
+  const prisma = getPrisma();
+  const existingSettings = await prisma.onboarding_settings.findUnique({
+    where: { guild_id: guildId },
+  });
+
+  if (existingSettings) {
+    return existingSettings;
+  }
+
+  const config = await prisma.guild_config.findUnique({
+    where: { guild_id: guildId },
+    select: {
+      onboarding_enabled: true,
+      welcome_channel_id: true,
+      allow_retake: true,
+      result_visibility: true,
+    },
+  });
+
+  return prisma.onboarding_settings.create({
+    data: {
+      guild_id: guildId,
+      onboarding_enabled: config?.onboarding_enabled ?? true,
+      welcome_channel_id: formatBigInt(config?.welcome_channel_id) ?? null,
+      allow_retakes: config?.allow_retake ?? false,
+      show_result_publicly: config?.result_visibility !== "private",
+    },
+  });
 }
 
 export async function GET(
@@ -239,76 +271,67 @@ export async function GET(
   try {
     const prisma = getPrisma();
     const [
-      config,
-      activeQuizCount,
+      settings,
+      questions,
+      factions,
       completedSessionsCount,
       assignedUsers,
-      quizzes,
-      factions,
     ] = await Promise.all([
-        prisma.guild_config.findUnique({
-          where: { guild_id: guildIdBigInt },
-          select: {
-            onboarding_enabled: true,
-            active_quiz_id: true,
-            allow_retake: true,
-            result_visibility: true,
-            welcome_channel_id: true,
+      getOrCreateSettings(guildIdBigInt),
+      prisma.faction_quiz_questions.findMany({
+        where: { guild_id: guildIdBigInt },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: {
+          id: true,
+          question: true,
+          position: true,
+          is_active: true,
+          faction_quiz_options: {
+            orderBy: [{ position: "asc" }, { id: "asc" }],
+            select: {
+              id: true,
+              label: true,
+              faction_id: true,
+              weight: true,
+              position: true,
+              is_active: true,
+            },
           },
-        }),
-        prisma.faction_quizzes.count({
-          where: { guild_id: guildIdBigInt, is_active: true },
-        }),
-        prisma.onboarding_sessions.count({
-          where: {
-            guild_id: guildIdBigInt,
-            OR: [{ status: "completed" }, { completed_at: { not: null } }],
-          },
-        }),
-        prisma.user_factions.findMany({
-          where: { guild_id: guildIdBigInt },
-          distinct: ["user_id"],
-          select: { user_id: true },
-        }),
-        prisma.faction_quizzes.findMany({
-          where: { guild_id: guildIdBigInt },
-          orderBy: [{ is_active: "desc" }, { name: "asc" }],
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            is_active: true,
-            allow_retake: true,
-          },
-        }),
-        prisma.factions.findMany({
-          where: { guild_id: guildIdBigInt },
-          orderBy: [{ is_active: "desc" }, { name: "asc" }],
-          select: {
-            id: true,
-            key: true,
-            name: true,
-            role_id: true,
-            is_active: true,
-          },
-        }),
-      ]);
+        },
+      }),
+      prisma.factions.findMany({
+        where: { guild_id: guildIdBigInt, is_active: true },
+        orderBy: [{ name: "asc" }],
+        select: {
+          id: true,
+          key: true,
+          name: true,
+          role_id: true,
+          is_active: true,
+        },
+      }),
+      prisma.onboarding_sessions.count({
+        where: {
+          guild_id: guildIdBigInt,
+          OR: [{ status: "completed" }, { completed_at: { not: null } }],
+        },
+      }),
+      prisma.user_factions.findMany({
+        where: { guild_id: guildIdBigInt },
+        distinct: ["user_id"],
+        select: { user_id: true },
+      }),
+    ]);
 
     return NextResponse.json({
-      found: Boolean(config),
-      onboarding: config ? toOnboardingResponse(config) : null,
-      quizzes: quizzes.map((quiz) => ({
-        id: quiz.id,
-        name: quiz.name,
-        description: quiz.description,
-        isActive: quiz.is_active,
-        allowRetake: quiz.allow_retake,
-      })),
+      found: true,
+      settings: toSettingsResponse(settings),
+      questions: questions.map(toQuestionResponse),
       factions: factions.map(toFactionResponse),
-      skippedFields: SKIPPED_FIELDS,
       metrics: {
-        onboardingEnabled: Boolean(config?.onboarding_enabled),
-        activeQuizCount,
+        onboardingEnabled: settings.onboarding_enabled,
+        activeQuestionCount: questions.filter((question) => question.is_active)
+          .length,
         completedSessionsCount,
         assignedUsersCount: assignedUsers.length,
       },
@@ -345,7 +368,7 @@ export async function PATCH(
     );
   }
 
-  const validation = validateOnboardingPatch(body);
+  const validation = validateSettingsPatch(body);
 
   if ("error" in validation) {
     return NextResponse.json(validation, { status: 400 });
@@ -353,49 +376,18 @@ export async function PATCH(
 
   try {
     const prisma = getPrisma();
-    const existingConfig = await prisma.guild_config.findUnique({
+    const updatedSettings = await prisma.onboarding_settings.upsert({
       where: { guild_id: guildIdBigInt },
-      select: { guild_id: true },
-    });
-
-    if (!existingConfig) {
-      return NextResponse.json(
-        { error: "No onboarding configuration found for this server yet." },
-        { status: 404 }
-      );
-    }
-
-    if (validation.data.active_quiz_id) {
-      const quizId = Number(validation.data.active_quiz_id);
-      const activeQuiz = await prisma.faction_quizzes.findFirst({
-        where: { id: quizId, guild_id: guildIdBigInt },
-        select: { id: true },
-      });
-
-      if (!activeQuiz) {
-        return NextResponse.json(
-          { error: "Active quiz was not found for this server." },
-          { status: 404 }
-        );
-      }
-    }
-
-    const updatedConfig = await prisma.guild_config.update({
-      where: { guild_id: guildIdBigInt },
-      data: validation.data,
-      select: {
-        onboarding_enabled: true,
-        active_quiz_id: true,
-        allow_retake: true,
-        result_visibility: true,
-        welcome_channel_id: true,
+      create: {
+        guild_id: guildIdBigInt,
+        ...validation.data,
       },
+      update: validation.data,
     });
 
     return NextResponse.json({
       found: true,
-      onboarding: toOnboardingResponse(updatedConfig),
-      skippedFields: SKIPPED_FIELDS,
+      settings: toSettingsResponse(updatedSettings),
     });
   } catch (error) {
     console.error("Failed to update server onboarding", error);
