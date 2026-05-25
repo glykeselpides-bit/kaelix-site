@@ -259,7 +259,7 @@ export default function ActivitiesManager({
       <section className="space-y-4">
         {activities.length === 0 ? (
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-slate-300">
-            No manageable activities are available yet.
+            No activity systems configured yet.
           </div>
         ) : (
           activities.map((activity) => {

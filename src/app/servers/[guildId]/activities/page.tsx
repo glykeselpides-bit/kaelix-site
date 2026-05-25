@@ -1,7 +1,6 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
 import {
   DataTable,
-  LoadError,
   MetricGrid,
   formatDashboardDate,
 } from "@/components/ServerReadOnlySection";
@@ -28,7 +27,54 @@ type ActivitiesData = {
   };
   activities: ActivitySetting[];
   recentSessions: ActivitySession[];
+  warnings?: string[];
 };
+
+const fallbackActivitiesData: ActivitiesData = {
+  metrics: {
+    activeActivitiesCount: 0,
+    totalSessions: 0,
+    trackedActivityTypes: 0,
+    configuredActivityTypes: 0,
+    enabledActivityTypes: 0,
+  },
+  activities: [],
+  recentSessions: [],
+  warnings: ["Activities could not be loaded."],
+};
+
+function normalizeActivitiesData(data: ActivitiesData | null): ActivitiesData {
+  if (!data || typeof data !== "object") {
+    return fallbackActivitiesData;
+  }
+
+  const metrics = data.metrics ?? fallbackActivitiesData.metrics;
+
+  return {
+    metrics: {
+      activeActivitiesCount: Number.isFinite(metrics.activeActivitiesCount)
+        ? metrics.activeActivitiesCount
+        : 0,
+      totalSessions: Number.isFinite(metrics.totalSessions)
+        ? metrics.totalSessions
+        : 0,
+      trackedActivityTypes: Number.isFinite(metrics.trackedActivityTypes)
+        ? metrics.trackedActivityTypes
+        : 0,
+      configuredActivityTypes: Number.isFinite(metrics.configuredActivityTypes)
+        ? metrics.configuredActivityTypes
+        : 0,
+      enabledActivityTypes: Number.isFinite(metrics.enabledActivityTypes)
+        ? metrics.enabledActivityTypes
+        : 0,
+    },
+    activities: Array.isArray(data.activities) ? data.activities : [],
+    recentSessions: Array.isArray(data.recentSessions)
+      ? data.recentSessions
+      : [],
+    warnings: Array.isArray(data.warnings) ? data.warnings : [],
+  };
+}
 
 export default async function ActivitiesPage({
   params,
@@ -36,7 +82,9 @@ export default async function ActivitiesPage({
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = await params;
-  const data = await fetchServerSection<ActivitiesData>(guildId, "activities");
+  const data = normalizeActivitiesData(
+    await fetchServerSection<ActivitiesData>(guildId, "activities")
+  );
 
   return (
     <ServerSectionPlaceholder
@@ -44,8 +92,13 @@ export default async function ActivitiesPage({
       title="Activities"
       description="Manage activities, challenges, and engagement systems."
     >
-      {data ? (
-        <div className="space-y-6">
+      <div className="space-y-6">
+          {data.warnings?.length ? (
+            <div className="rounded-3xl border border-amber-400/20 bg-amber-400/10 p-5 text-sm text-amber-100">
+              {data.warnings[0]}
+            </div>
+          ) : null}
+
           <MetricGrid
             metrics={[
               {
@@ -64,7 +117,7 @@ export default async function ActivitiesPage({
           <ActivitiesManager
             guildId={guildId}
             initialActivities={data.activities}
-            loadError={false}
+            loadError={Boolean(data.warnings?.length)}
           />
 
           <DataTable
@@ -94,9 +147,6 @@ export default async function ActivitiesPage({
             ]}
           />
         </div>
-      ) : (
-        <LoadError label="server activities" />
-      )}
     </ServerSectionPlaceholder>
   );
 }

@@ -27,6 +27,28 @@ type RecentSession = {
   endedAt: string | null;
 };
 
+type ActivitySettingRecord = {
+  activity_key: string;
+  enabled: boolean;
+  reward_points: number;
+  cooldown_seconds: number;
+  channel_id: bigint | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
+type ActivitySessionResult = {
+  activity: ActivityCatalogItem;
+  active: number;
+  total: number;
+  recent: {
+    is_active: boolean;
+    started_at: Date;
+    ended_at?: Date | null;
+    ends_at?: Date | null;
+  }[];
+};
+
 type ActivityPatch = {
   activityKey: string;
   enabled?: boolean;
@@ -98,17 +120,27 @@ function getModelDelegate(
   };
 }
 
+function isKnownMissingTableError(error: unknown) {
+  if (!isRecord(error)) {
+    return false;
+  }
+
+  const message =
+    typeof error.message === "string" ? error.message.toLowerCase() : "";
+  const meta = isRecord(error.meta) ? error.meta : {};
+  const cause = typeof meta.cause === "string" ? meta.cause.toLowerCase() : "";
+  const code = typeof error.code === "string" ? error.code : "";
+
+  return (
+    code === "P2021" ||
+    message.includes("does not exist") ||
+    cause.includes("does not exist")
+  );
+}
+
 function toActivitySettingResponse(
   activity: ActivityCatalogItem,
-  setting?: {
-    activity_key: string;
-    enabled: boolean;
-    reward_points: number;
-    cooldown_seconds: number;
-    channel_id: bigint | null;
-    created_at: Date;
-    updated_at: Date;
-  }
+  setting?: ActivitySettingRecord
 ) {
   return {
     activityKey: activity.key,
@@ -120,6 +152,23 @@ function toActivitySettingResponse(
     configured: Boolean(setting),
     createdAt: formatDate(setting?.created_at),
     updatedAt: formatDate(setting?.updated_at),
+  };
+}
+
+function getDefaultActivityPayload(warnings: string[] = []) {
+  return {
+    metrics: {
+      activeActivitiesCount: 0,
+      totalSessions: 0,
+      trackedActivityTypes: ACTIVITY_CATALOG.length,
+      configuredActivityTypes: 0,
+      enabledActivityTypes: ACTIVITY_CATALOG.length,
+    },
+    activities: ACTIVITY_CATALOG.map((activity) =>
+      toActivitySettingResponse(activity)
+    ),
+    recentSessions: [] as RecentSession[],
+    warnings,
   };
 }
 
@@ -240,34 +289,69 @@ function validateActivityPatch(body: unknown) {
   return { activities };
 }
 
+async function getSessionResult(
+  prisma: ReturnType<typeof getPrisma>,
+  guildIdBigInt: bigint,
+  activity: ActivityCatalogItem
+): Promise<ActivitySessionResult> {
+  try {
+    const delegate = getModelDelegate(prisma, activity.sessionModel);
+    const [active, total, recent] = await Promise.all([
+      delegate.count({ where: { guild_id: guildIdBigInt, is_active: true } }),
+      delegate.count({ where: { guild_id: guildIdBigInt } }),
+      delegate.findMany({
+        where: { guild_id: guildIdBigInt },
+        orderBy: { started_at: "desc" },
+        take: 3,
+        select: {
+          is_active: true,
+          started_at: true,
+          [activity.endedField ?? "ended_at"]: true,
+        },
+      }),
+    ]);
+
+    return { activity, active, total, recent };
+  } catch (error) {
+    console.error("Failed to load activity session metrics", {
+      activityKey: activity.key,
+      sessionModel: activity.sessionModel,
+      error,
+    });
+
+    return { activity, active: 0, total: 0, recent: [] };
+  }
+}
+
+async function getStoredActivitySettings(
+  prisma: ReturnType<typeof getPrisma>,
+  guildIdBigInt: bigint
+) {
+  try {
+    return await prisma.activity_settings.findMany({
+      where: { guild_id: guildIdBigInt },
+      select: activitySettingsSelect,
+    });
+  } catch (error) {
+    console.error("Failed to load activity settings; using defaults", {
+      guildId: guildIdBigInt.toString(),
+      missingTable: isKnownMissingTableError(error),
+      error,
+    });
+
+    return [] as ActivitySettingRecord[];
+  }
+}
+
 async function getActivityPayload(guildIdBigInt: bigint) {
   const prisma = getPrisma();
   const sessionResults = await Promise.all(
-    ACTIVITY_CATALOG.map(async (activity) => {
-      const delegate = getModelDelegate(prisma, activity.sessionModel);
-      const [active, total, recent] = await Promise.all([
-        delegate.count({ where: { guild_id: guildIdBigInt, is_active: true } }),
-        delegate.count({ where: { guild_id: guildIdBigInt } }),
-        delegate.findMany({
-          where: { guild_id: guildIdBigInt },
-          orderBy: { started_at: "desc" },
-          take: 3,
-          select: {
-            is_active: true,
-            started_at: true,
-            [activity.endedField ?? "ended_at"]: true,
-          },
-        }),
-      ]);
-
-      return { activity, active, total, recent };
-    })
+    ACTIVITY_CATALOG.map((activity) =>
+      getSessionResult(prisma, guildIdBigInt, activity)
+    )
   );
 
-  const storedSettings = await prisma.activity_settings.findMany({
-    where: { guild_id: guildIdBigInt },
-    select: activitySettingsSelect,
-  });
+  const storedSettings = await getStoredActivitySettings(prisma, guildIdBigInt);
   const settingsByKey = new Map(
     storedSettings.map((setting) => [setting.activity_key, setting])
   );
@@ -321,11 +405,13 @@ export async function GET(
   try {
     return NextResponse.json(await getActivityPayload(guildIdBigInt));
   } catch (error) {
-    console.error("Failed to load server activities", error);
+    console.error("Failed to load server activities; returning safe defaults", {
+      guildId,
+      error,
+    });
 
     return NextResponse.json(
-      { error: "Failed to load server activities" },
-      { status: 500 }
+      getDefaultActivityPayload(["Activity data could not be loaded."])
     );
   }
 }
@@ -404,10 +490,19 @@ export async function PATCH(
 
     return NextResponse.json(await getActivityPayload(guildIdBigInt));
   } catch (error) {
-    console.error("Failed to update server activity settings", error);
+    console.error("Failed to update server activity settings", {
+      guildId,
+      missingTable: isKnownMissingTableError(error),
+      error,
+    });
 
     return NextResponse.json(
-      { error: "Failed to update server activity settings" },
+      {
+        ...getDefaultActivityPayload([
+          "Activity settings could not be saved.",
+        ]),
+        error: "Failed to update server activity settings",
+      },
       { status: 500 }
     );
   }
