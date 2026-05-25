@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
 
 export const dynamic = "force-dynamic";
@@ -5,12 +6,23 @@ export const runtime = "nodejs";
 
 async function getSettings(guildId: string) {
   try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      "http://localhost:3000";
+    const requestHeaders = await headers();
+    const host =
+      requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+    const protocol =
+      requestHeaders.get("x-forwarded-proto") ??
+      (host?.startsWith("localhost") || host?.startsWith("127.0.0.1")
+        ? "http"
+        : "https");
+
+    if (!host) {
+      return null;
+    }
+
+    const baseUrl = `${protocol}://${host}`;
 
     const response = await fetch(
-      `${baseUrl}/api/servers/${guildId}/settings`,
+      `${baseUrl}/api/servers/${encodeURIComponent(guildId)}/settings`,
       {
         cache: "no-store",
       }
