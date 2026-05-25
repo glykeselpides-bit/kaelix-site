@@ -271,6 +271,7 @@ export default function TriviaQuestionsManager({
   const normalizedInitial = normalizePayload(initialPayload);
   const [questions, setQuestions] = useState(normalizedInitial.questions);
   const [total, setTotal] = useState(normalizedInitial.total);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createDraft, setCreateDraft] = useState(emptyDraft);
   const [editing, setEditing] = useState<Record<number, TriviaDraft>>(() =>
     Object.fromEntries(
@@ -323,11 +324,12 @@ export default function TriviaQuestionsManager({
       )}/activities/trivia?includeInactive=true`,
       { cache: "no-store" }
     );
-    const data = normalizePayload(await response.json().catch(() => null));
+    const rawData = await response.json().catch(() => null);
+    const data = normalizePayload(rawData);
 
     if (!response.ok) {
       throw new Error(
-        getErrorMessage(data, "Failed to refresh trivia questions.")
+        getErrorMessage(rawData, "Failed to refresh trivia questions.")
       );
     }
 
@@ -372,6 +374,7 @@ export default function TriviaQuestionsManager({
 
       await refreshQuestions();
       setCreateDraft(emptyDraft);
+      setIsCreateOpen(false);
       setSuccess("Trivia question created.");
     } catch (createError) {
       setError(
@@ -517,55 +520,70 @@ export default function TriviaQuestionsManager({
 
       <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h3 className="text-lg font-bold text-white">New question</h3>
           <button
             type="button"
-            onClick={createQuestion}
+            onClick={() => setIsCreateOpen((current) => !current)}
             disabled={isBusy}
             className="rounded-2xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:bg-slate-600"
           >
-            {busyAction === "create" ? "Creating..." : "Create"}
+            {isCreateOpen ? "Close" : "+ New trivia question"}
           </button>
+          {isCreateOpen ? (
+            <button
+              type="button"
+              onClick={createQuestion}
+              disabled={isBusy}
+              className="rounded-2xl border border-white/10 px-5 py-3 text-sm font-bold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.04] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {busyAction === "create" ? "Creating..." : "Create question"}
+            </button>
+          ) : null}
         </div>
-        <div className="mt-5">
-          <QuestionFields
-            draft={createDraft}
-            disabled={isBusy}
-            onChange={setCreateDraft}
-          />
-        </div>
+        {isCreateOpen ? (
+          <div className="mt-5">
+            <QuestionFields
+              draft={createDraft}
+              disabled={isBusy}
+              onChange={setCreateDraft}
+            />
+          </div>
+        ) : null}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <TextInput
-          value={search}
-          disabled={isBusy}
-          placeholder="Search questions, answers, categories"
-          onChange={setSearch}
-        />
-        <select
-          value={categoryFilter}
-          disabled={isBusy}
-          onChange={(event) => setCategoryFilter(event.target.value)}
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition focus:border-blue-400 disabled:opacity-60"
-        >
-          <option value="">All categories</option>
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-        <SelectInput
-          value={difficultyFilter}
-          disabled={isBusy}
-          onChange={setDifficultyFilter}
-        />
-      </div>
+      {questions.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-3">
+          <TextInput
+            value={search}
+            disabled={isBusy}
+            placeholder="Search questions, answers, categories"
+            onChange={setSearch}
+          />
+          <select
+            value={categoryFilter}
+            disabled={isBusy}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+            className="mt-2 w-full rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition focus:border-blue-400 disabled:opacity-60"
+          >
+            <option value="">All categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <SelectInput
+            value={difficultyFilter}
+            disabled={isBusy}
+            onChange={setDifficultyFilter}
+          />
+        </div>
+      ) : null}
 
       {filteredQuestions.length === 0 ? (
         <div className="rounded-3xl border border-white/10 bg-black/20 p-8 text-slate-300">
-          No trivia questions match this view.
+          {questions.length === 0
+            ? "No trivia questions yet."
+            : "No trivia questions match this view."}
         </div>
       ) : (
         <div className="space-y-3">

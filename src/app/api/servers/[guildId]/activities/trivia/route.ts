@@ -28,6 +28,20 @@ const triviaQuestionSelect = {
   updated_at: true,
 } satisfies Prisma.trivia_questionsSelect;
 
+type TriviaQuestionRecord = {
+  id: number;
+  guild_id: bigint | null;
+  category: string | null;
+  question_type: string | null;
+  question: string;
+  answer: string;
+  difficulty: string | null;
+  reward_points: number | null;
+  is_active: boolean | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -45,33 +59,42 @@ function normalizeOptionalString(value: unknown) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function toQuestionResponse(question: {
-  id: number;
-  guild_id: bigint | null;
-  category: string;
-  question_type: string;
-  question: string;
-  answer: string;
-  difficulty: string | null;
-  reward_points: number | null;
-  is_active: boolean;
-  created_at: Date;
-  updated_at: Date;
-}) {
+function toQuestionResponse(question: TriviaQuestionRecord) {
   return {
     id: question.id,
     guildId: formatBigInt(question.guild_id),
     scope: question.guild_id ? "guild" : "global",
-    category: question.category,
-    questionType: question.question_type,
+    category: question.category?.trim() || "General",
+    questionType: question.question_type?.trim() || "open",
     question: question.question,
     answer: question.answer,
-    difficulty: question.difficulty,
-    rewardPoints: question.reward_points,
-    isActive: question.is_active,
+    difficulty: question.difficulty?.trim() || null,
+    rewardPoints: question.reward_points ?? null,
+    isActive: question.is_active ?? true,
     createdAt: formatDate(question.created_at),
     updatedAt: formatDate(question.updated_at),
   };
+}
+
+function isKnownSchemaDriftError(error: unknown) {
+  if (!isRecord(error)) {
+    return false;
+  }
+
+  const code = typeof error.code === "string" ? error.code : "";
+  const message =
+    typeof error.message === "string" ? error.message.toLowerCase() : "";
+  const meta = isRecord(error.meta) ? error.meta : {};
+  const cause = typeof meta.cause === "string" ? meta.cause.toLowerCase() : "";
+
+  return (
+    code === "P2021" ||
+    code === "P2022" ||
+    message.includes("does not exist") ||
+    message.includes("column") ||
+    cause.includes("does not exist") ||
+    cause.includes("column")
+  );
 }
 
 function validateQuestionCreate(body: unknown) {
@@ -306,38 +329,134 @@ export async function GET(
   const offset =
     Number.isInteger(offsetParam) && offsetParam > 0 ? offsetParam : 0;
 
-  const where: Prisma.trivia_questionsWhereInput = {
-    ...(includeGlobal
+  const andFilters: Prisma.trivia_questionsWhereInput[] = [
+    includeGlobal
       ? { OR: [{ guild_id: guildIdBigInt }, { guild_id: null }] }
-      : { guild_id: guildIdBigInt }),
-    ...(includeInactive ? {} : { is_active: true }),
-    ...(category ? { category: { equals: category, mode: "insensitive" } } : {}),
-    ...(difficulty
-      ? { difficulty: { equals: difficulty, mode: "insensitive" } }
-      : {}),
-    ...(search
-      ? {
-          OR: [
-            { question: { contains: search, mode: "insensitive" } },
-            { answer: { contains: search, mode: "insensitive" } },
-            { category: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : {}),
-  };
+      : { guild_id: guildIdBigInt },
+  ];
+
+  if (!includeInactive) {
+    andFilters.push({ is_active: true });
+  }
+
+  if (category) {
+    andFilters.push({ category: { equals: category, mode: "insensitive" } });
+  }
+
+  if (difficulty) {
+    andFilters.push({
+      difficulty: { equals: difficulty, mode: "insensitive" },
+    });
+  }
+
+  if (search) {
+    andFilters.push({
+      OR: [
+        { question: { contains: search, mode: "insensitive" } },
+        { answer: { contains: search, mode: "insensitive" } },
+        { category: { contains: search, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  const where: Prisma.trivia_questionsWhereInput = { AND: andFilters };
 
   try {
     const prisma = getPrisma();
-    const [questions, total] = await Promise.all([
-      prisma.trivia_questions.findMany({
-        where,
-        orderBy: [{ guild_id: "desc" }, { updated_at: "desc" }, { id: "desc" }],
-        take: limit,
-        skip: offset,
-        select: triviaQuestionSelect,
-      }),
-      prisma.trivia_questions.count({ where }),
-    ]);
+    let questions: TriviaQuestionRecord[];
+    let total = 0;
+
+    try {
+      [questions, total] = await Promise.all([
+        prisma.trivia_questions.findMany({
+          where,
+          orderBy: [
+            { guild_id: "desc" },
+            { updated_at: "desc" },
+            { id: "desc" },
+          ],
+          take: limit,
+          skip: offset,
+          select: triviaQuestionSelect,
+        }),
+        prisma.trivia_questions.count({ where }),
+      ]);
+    } catch (queryError) {
+      if (!isKnownSchemaDriftError(queryError)) {
+        throw queryError;
+      }
+
+      console.error(
+        "Trivia question management columns are missing; falling back to legacy global trivia_questions read",
+        {
+          guildId,
+          error: queryError,
+        }
+      );
+
+      if (!includeGlobal) {
+        questions = [];
+        total = 0;
+      } else {
+        const legacyQuestions = await prisma.trivia_questions.findMany({
+          where: {
+            ...(category
+              ? { category: { equals: category, mode: "insensitive" } }
+              : {}),
+            ...(difficulty
+              ? { difficulty: { equals: difficulty, mode: "insensitive" } }
+              : {}),
+            ...(search
+              ? {
+                  OR: [
+                    { question: { contains: search, mode: "insensitive" } },
+                    { answer: { contains: search, mode: "insensitive" } },
+                    { category: { contains: search, mode: "insensitive" } },
+                  ],
+                }
+              : {}),
+          },
+          orderBy: { id: "desc" },
+          take: limit,
+          skip: offset,
+          select: {
+            id: true,
+            category: true,
+            question_type: true,
+            question: true,
+            answer: true,
+            difficulty: true,
+          },
+        });
+        total = await prisma.trivia_questions.count({
+          where: {
+            ...(category
+              ? { category: { equals: category, mode: "insensitive" } }
+              : {}),
+            ...(difficulty
+              ? { difficulty: { equals: difficulty, mode: "insensitive" } }
+              : {}),
+            ...(search
+              ? {
+                  OR: [
+                    { question: { contains: search, mode: "insensitive" } },
+                    { answer: { contains: search, mode: "insensitive" } },
+                    { category: { contains: search, mode: "insensitive" } },
+                  ],
+                }
+              : {}),
+          },
+        });
+        questions = legacyQuestions.map((question) => ({
+          ...question,
+          guild_id: null,
+          reward_points: null,
+          is_active: true,
+          created_at: null,
+          updated_at: null,
+        }));
+      }
+    }
 
     return NextResponse.json({
       questions: questions.map(toQuestionResponse),
@@ -351,13 +470,16 @@ export async function GET(
       error,
     });
 
-    return NextResponse.json({
-      questions: [],
-      total: 0,
-      limit,
-      offset,
-      warnings: ["Trivia questions could not be loaded."],
-    });
+    return NextResponse.json(
+      {
+        questions: [],
+        total: 0,
+        limit,
+        offset,
+        error: "Trivia questions could not be loaded.",
+      },
+      { status: 500 }
+    );
   }
 }
 
