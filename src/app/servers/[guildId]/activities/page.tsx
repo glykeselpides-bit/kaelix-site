@@ -6,6 +6,7 @@ import {
   formatDashboardDate,
 } from "@/components/ServerReadOnlySection";
 import { fetchServerSection } from "@/lib/dashboardFetch";
+import ActivitiesManager, { type ActivitySetting } from "./ActivitiesManager";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,7 +23,10 @@ type ActivitiesData = {
     activeActivitiesCount: number;
     totalSessions: number;
     trackedActivityTypes: number;
+    configuredActivityTypes: number;
+    enabledActivityTypes: number;
   };
+  activities: ActivitySetting[];
   recentSessions: ActivitySession[];
 };
 
@@ -52,9 +56,15 @@ export default async function ActivitiesPage({
               {
                 label: "Tracked Types",
                 value: data.metrics.trackedActivityTypes,
-                note: "Caption This, Cipher, Hidden Word, Story Chain, and Trivia sessions.",
+                note: `${data.metrics.enabledActivityTypes} enabled / ${data.metrics.configuredActivityTypes} configured.`,
               },
             ]}
+          />
+
+          <ActivitiesManager
+            guildId={guildId}
+            initialActivities={data.activities}
+            loadError={false}
           />
 
           <DataTable

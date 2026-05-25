@@ -44,6 +44,22 @@ model activity_sessions {
   question_pool       Json      @db.Json
 }
 
+model activity_settings {
+  id               Int      @id @default(autoincrement())
+  guild_id         BigInt
+  activity_key     String   @db.VarChar(80)
+  enabled          Boolean  @default(true)
+  reward_points    Int      @default(0)
+  cooldown_seconds Int      @default(0)
+  channel_id       BigInt?
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([guild_id, activity_key], map: "uq_activity_settings_guild_activity")
+  @@index([activity_key], map: "ix_activity_settings_activity_key")
+  @@index([guild_id], map: "ix_activity_settings_guild_id")
+}
+
 model audit_logs {
   id             Int      @id @default(autoincrement())
   guild_id       BigInt
