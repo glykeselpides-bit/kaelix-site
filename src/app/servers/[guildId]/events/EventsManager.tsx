@@ -324,7 +324,7 @@ function EventFields({
           value={draft.name}
           disabled={disabled}
           maxLength={100}
-          placeholder="Weekly raid"
+          placeholder="Weekly event"
           onChange={(name) => onChange({ ...draft, name })}
         />
       </FieldShell>
