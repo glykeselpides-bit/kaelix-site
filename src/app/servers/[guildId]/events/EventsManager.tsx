@@ -23,8 +23,11 @@ type DiscordChannel = {
 
 type EventDraft = {
   name: string;
-  date: string;
-  time: string;
+  day: string;
+  month: string;
+  year: string;
+  hour: string;
+  minute: string;
   sourceTimezone: string;
   channelId: string;
   rewardPoints: string;
@@ -44,11 +47,35 @@ const timezoneOptions = [
 ];
 
 const statusOptions = ["scheduled", "active", "completed", "cancelled"];
+const dayOptions = Array.from({ length: 31 }, (_, index) =>
+  String(index + 1).padStart(2, "0")
+);
+const monthOptions = [
+  { value: "01", label: "Jan" },
+  { value: "02", label: "Feb" },
+  { value: "03", label: "Mar" },
+  { value: "04", label: "Apr" },
+  { value: "05", label: "May" },
+  { value: "06", label: "Jun" },
+  { value: "07", label: "Jul" },
+  { value: "08", label: "Aug" },
+  { value: "09", label: "Sep" },
+  { value: "10", label: "Oct" },
+  { value: "11", label: "Nov" },
+  { value: "12", label: "Dec" },
+];
+const hourOptions = Array.from({ length: 24 }, (_, index) =>
+  String(index).padStart(2, "0")
+);
+const minuteOptions = ["00", "15", "30", "45"];
 
 const emptyDraft: EventDraft = {
   name: "",
-  date: "",
-  time: "",
+  day: "",
+  month: "",
+  year: "",
+  hour: "",
+  minute: "",
   sourceTimezone: "UTC",
   channelId: "",
   rewardPoints: "0",
@@ -57,13 +84,13 @@ const emptyDraft: EventDraft = {
 
 function getDatePartsInTimezone(value: string | null, timezone: string) {
   if (!value) {
-    return { date: "", time: "" };
+    return { day: "", month: "", year: "", hour: "", minute: "" };
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return { date: "", time: "" };
+    return { day: "", month: "", year: "", hour: "", minute: "" };
   }
 
   try {
@@ -81,8 +108,11 @@ function getDatePartsInTimezone(value: string | null, timezone: string) {
     );
 
     return {
-      date: `${values.year}-${values.month}-${values.day}`,
-      time: `${values.hour}:${values.minute}`,
+      day: values.day ?? "",
+      month: values.month ?? "",
+      year: values.year ?? "",
+      hour: values.hour ?? "",
+      minute: values.minute ?? "",
     };
   } catch {
     const offsetMs = date.getTimezoneOffset() * 60_000;
@@ -91,8 +121,11 @@ function getDatePartsInTimezone(value: string | null, timezone: string) {
       .slice(0, 16);
 
     return {
-      date: localValue.slice(0, 10),
-      time: localValue.slice(11, 16),
+      day: localValue.slice(8, 10),
+      month: localValue.slice(5, 7),
+      year: localValue.slice(0, 4),
+      hour: localValue.slice(11, 13),
+      minute: localValue.slice(14, 16),
     };
   }
 }
@@ -105,8 +138,11 @@ function toDraft(event: EventItem): EventDraft {
 
   return {
     name: event.name,
-    date: dateParts.date,
-    time: dateParts.time,
+    day: dateParts.day,
+    month: dateParts.month,
+    year: dateParts.year,
+    hour: dateParts.hour,
+    minute: dateParts.minute,
     sourceTimezone: timezone,
     channelId: event.channelId ?? "",
     rewardPoints: String(event.rewardPoints),
@@ -130,6 +166,43 @@ function getErrorMessage(data: unknown, fallback: string) {
   }
 
   return fallback;
+}
+
+function getDraftDateValue(draft: EventDraft) {
+  return `${draft.year}-${draft.month}-${draft.day}`;
+}
+
+function getDraftTimeValue(draft: EventDraft) {
+  return `${draft.hour}:${draft.minute}`;
+}
+
+function validateDraftDateTime(draft: EventDraft) {
+  if (
+    !draft.day ||
+    !draft.month ||
+    !draft.year ||
+    !draft.hour ||
+    !draft.minute
+  ) {
+    return "Choose a complete date and time before saving the event.";
+  }
+
+  const year = Number(draft.year);
+  const month = Number(draft.month);
+  const day = Number(draft.day);
+  const hour = Number(draft.hour);
+  const minute = Number(draft.minute);
+  const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return "Choose a valid calendar date for this event.";
+  }
+
+  return null;
 }
 
 function getTimezoneParts(date: Date, timezone: string) {
@@ -193,7 +266,11 @@ function toUtcIso(dateValue: string, timeValue: string, timezone: string) {
 function normalizeDraft(draft: EventDraft) {
   return {
     name: draft.name.trim(),
-    startsAt: toUtcIso(draft.date, draft.time, draft.sourceTimezone),
+    startsAt: toUtcIso(
+      getDraftDateValue(draft),
+      getDraftTimeValue(draft),
+      draft.sourceTimezone
+    ),
     sourceTimezone: draft.sourceTimezone,
     channelId: draft.channelId.trim(),
     rewardPoints: Number(draft.rewardPoints),
@@ -305,6 +382,7 @@ function EventFields({
   channelsLoading,
   channelsError,
   showStatus,
+  yearOptions,
   onChange,
 }: {
   draft: EventDraft;
@@ -313,6 +391,7 @@ function EventFields({
   channelsLoading: boolean;
   channelsError: string | null;
   showStatus: boolean;
+  yearOptions: string[];
   onChange: (draft: EventDraft) => void;
 }) {
   const useManualChannel = channelsError !== null || channels.length === 0;
@@ -366,21 +445,73 @@ function EventFields({
       </FieldShell>
 
       <FieldShell label="Date">
-        <TextInput
-          type="date"
-          value={draft.date}
-          disabled={disabled}
-          onChange={(date) => onChange({ ...draft, date })}
-        />
+        <div className="grid grid-cols-3 gap-3">
+          <SelectInput
+            value={draft.day}
+            disabled={disabled}
+            onChange={(day) => onChange({ ...draft, day })}
+          >
+            <option value="">Day</option>
+            {dayOptions.map((day) => (
+              <option key={day} value={day}>
+                {day}
+              </option>
+            ))}
+          </SelectInput>
+          <SelectInput
+            value={draft.month}
+            disabled={disabled}
+            onChange={(month) => onChange({ ...draft, month })}
+          >
+            <option value="">Month</option>
+            {monthOptions.map((month) => (
+              <option key={month.value} value={month.value}>
+                {month.label}
+              </option>
+            ))}
+          </SelectInput>
+          <SelectInput
+            value={draft.year}
+            disabled={disabled}
+            onChange={(year) => onChange({ ...draft, year })}
+          >
+            <option value="">Year</option>
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </SelectInput>
+        </div>
       </FieldShell>
 
       <FieldShell label="Time">
-        <TextInput
-          type="time"
-          value={draft.time}
-          disabled={disabled}
-          onChange={(time) => onChange({ ...draft, time })}
-        />
+        <div className="grid grid-cols-2 gap-3">
+          <SelectInput
+            value={draft.hour}
+            disabled={disabled}
+            onChange={(hour) => onChange({ ...draft, hour })}
+          >
+            <option value="">Hour</option>
+            {hourOptions.map((hour) => (
+              <option key={hour} value={hour}>
+                {hour}
+              </option>
+            ))}
+          </SelectInput>
+          <SelectInput
+            value={draft.minute}
+            disabled={disabled}
+            onChange={(minute) => onChange({ ...draft, minute })}
+          >
+            <option value="">Minute</option>
+            {minuteOptions.map((minute) => (
+              <option key={minute} value={minute}>
+                {minute}
+              </option>
+            ))}
+          </SelectInput>
+        </div>
       </FieldShell>
 
       <FieldShell label="Timezone">
@@ -428,10 +559,12 @@ function EventFields({
 
 export default function EventsManager({
   guildId,
+  currentYear,
   initialEvents,
   loadError,
 }: {
   guildId: string;
+  currentYear: number;
   initialEvents: EventItem[];
   loadError: boolean;
 }) {
@@ -459,6 +592,11 @@ export default function EventsManager({
   );
 
   const isBusy = busyAction !== null;
+  const yearOptions = useMemo(
+    () =>
+      Array.from({ length: 3 }, (_, index) => String(currentYear + index)),
+    [currentYear]
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -532,6 +670,14 @@ export default function EventsManager({
   }
 
   async function createEvent() {
+    const dateTimeError = validateDraftDateTime(createDraft);
+
+    if (dateTimeError) {
+      setError(dateTimeError);
+      setSuccess(null);
+      return;
+    }
+
     setBusyAction("create");
     setError(null);
     setSuccess(null);
@@ -572,6 +718,14 @@ export default function EventsManager({
     const draft = editing[eventId];
 
     if (!draft) {
+      return;
+    }
+
+    const dateTimeError = validateDraftDateTime(draft);
+
+    if (dateTimeError) {
+      setError(dateTimeError);
+      setSuccess(null);
       return;
     }
 
@@ -678,6 +832,7 @@ export default function EventsManager({
             channelsLoading={channelsLoading}
             channelsError={channelsError}
             showStatus={false}
+            yearOptions={yearOptions}
             onChange={setCreateDraft}
           />
         </div>
@@ -781,6 +936,7 @@ export default function EventsManager({
                       channelsLoading={channelsLoading}
                       channelsError={channelsError}
                       showStatus
+                      yearOptions={yearOptions}
                       onChange={(nextDraft) =>
                         setEditing((current) => ({
                           ...current,

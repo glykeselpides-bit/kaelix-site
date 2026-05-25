@@ -26,6 +26,7 @@ export default async function EventsPage({
     >
       <EventsManager
         guildId={guildId}
+        currentYear={new Date().getFullYear()}
         initialEvents={data?.events ?? []}
         loadError={!data}
       />
