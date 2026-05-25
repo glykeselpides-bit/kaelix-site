@@ -1,7 +1,27 @@
 import Link from "next/link";
+import { fetchServerSection } from "@/lib/dashboardFetch";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+type OverviewMetrics = {
+  trackedUsers: number;
+  totalPoints: number;
+  eventsHosted: number;
+  activeFactions: number;
+  activitiesPlayed: number;
+  weeklyEngagement: number | null;
+};
+
+type OverviewResponse = {
+  metrics: OverviewMetrics;
+};
+
+const numberFormatter = new Intl.NumberFormat("en-GB");
+
+function formatMetric(value: number | null | undefined) {
+  return typeof value === "number" ? numberFormatter.format(value) : "—";
+}
 
 export default async function ServerDashboardPage({
   params,
@@ -9,14 +29,28 @@ export default async function ServerDashboardPage({
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = await params;
+  const overview = await fetchServerSection<OverviewResponse>(
+    guildId,
+    "overview"
+  );
+  const metrics = overview?.metrics;
 
   const stats = [
-    { label: "Members Tracked", value: "—" },
-    { label: "Total Points", value: "—" },
-    { label: "Events Hosted", value: "—" },
-    { label: "Active Factions", value: "—" },
-    { label: "Activities Played", value: "—" },
-    { label: "Weekly Engagement", value: "—" },
+    { label: "Members Tracked", value: formatMetric(metrics?.trackedUsers) },
+    { label: "Total Points", value: formatMetric(metrics?.totalPoints) },
+    { label: "Events Hosted", value: formatMetric(metrics?.eventsHosted) },
+    { label: "Active Factions", value: formatMetric(metrics?.activeFactions) },
+    {
+      label: "Activities Played",
+      value: formatMetric(metrics?.activitiesPlayed),
+    },
+    {
+      label: "Weekly Engagement",
+      value:
+        metrics?.weeklyEngagement === null
+          ? "Coming soon"
+          : formatMetric(metrics?.weeklyEngagement),
+    },
   ];
 
   const actions = [
@@ -62,9 +96,7 @@ export default async function ServerDashboardPage({
 
       <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-5xl font-bold md:text-6xl">
-            Manage Server
-          </h1>
+          <h1 className="text-5xl font-bold md:text-6xl">Manage Server</h1>
 
           <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
             Control Kaelix systems, settings, activity tools, factions,
