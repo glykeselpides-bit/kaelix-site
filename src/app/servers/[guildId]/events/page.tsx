@@ -1,21 +1,10 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
-import {
-  DataTable,
-  LoadError,
-  formatDashboardDate,
-} from "@/components/ServerReadOnlySection";
 import { fetchServerSection } from "@/lib/dashboardFetch";
+import EventsManager, { type EventItem } from "./EventsManager";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-type EventItem = {
-  name: string;
-  eventCode: string;
-  startsAt: string | null;
-  status: string;
-  rewardPoints: number;
-};
+export const revalidate = 0;
 
 type EventsData = {
   events: EventItem[];
@@ -35,37 +24,11 @@ export default async function EventsPage({
       title="Events"
       description="Manage Kaelix events, reminders, registrations, and attendance systems."
     >
-      {data ? (
-        <DataTable
-          emptyText="No events found for this server yet."
-          items={data.events}
-          columns={[
-            { key: "name", label: "Name", render: (event) => event.name },
-            {
-              key: "eventCode",
-              label: "Code",
-              render: (event) => event.eventCode,
-            },
-            {
-              key: "startsAt",
-              label: "Starts At",
-              render: (event) => formatDashboardDate(event.startsAt),
-            },
-            {
-              key: "status",
-              label: "Status",
-              render: (event) => event.status,
-            },
-            {
-              key: "rewardPoints",
-              label: "Reward Points",
-              render: (event) => event.rewardPoints,
-            },
-          ]}
-        />
-      ) : (
-        <LoadError label="server events" />
-      )}
+      <EventsManager
+        guildId={guildId}
+        initialEvents={data?.events ?? []}
+        loadError={!data}
+      />
     </ServerSectionPlaceholder>
   );
 }
