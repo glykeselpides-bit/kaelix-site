@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export type DiscordChannel = {
   id: string;
@@ -19,6 +19,7 @@ type ResourceState<T> = {
   items: T[];
   isLoading: boolean;
   error: string | null;
+  refresh: () => void;
 };
 
 type DiscordSelectProps = {
@@ -63,6 +64,10 @@ function useDiscordResource<T>(
   const [items, setItems] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
+  const [refreshIndex, setRefreshIndex] = useState(0);
+  const refresh = useCallback(() => {
+    setRefreshIndex((current) => current + 1);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -114,9 +119,9 @@ function useDiscordResource<T>(
     return () => {
       isMounted = false;
     };
-  }, [enabled, fallbackError, guildId, resource]);
+  }, [enabled, fallbackError, guildId, refreshIndex, resource]);
 
-  return { items, isLoading, error };
+  return { items, isLoading, error, refresh };
 }
 
 export function useDiscordChannels(guildId: string, enabled = true) {

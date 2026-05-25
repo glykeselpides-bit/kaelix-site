@@ -123,6 +123,127 @@ function TextField({
   );
 }
 
+function RoleLinkPanel({
+  guildId,
+  rolesState,
+  value,
+  disabled,
+  suggestedName,
+  suggestedColor,
+  isCreatingRole,
+  onChange,
+  onCreateRole,
+}: {
+  guildId: string;
+  rolesState: ReturnType<typeof useDiscordRoles>;
+  value: string;
+  disabled: boolean;
+  suggestedName: string;
+  suggestedColor: string;
+  isCreatingRole: boolean;
+  onChange: (roleId: string) => void;
+  onCreateRole: (name: string, color: string) => Promise<void>;
+}) {
+  const [mode, setMode] = useState<"existing" | "create">("existing");
+  const [roleName, setRoleName] = useState("");
+  const [roleColor, setRoleColor] = useState(suggestedColor);
+  const roleNameValue = roleName.trim() || suggestedName.trim();
+  const roleColorValue = roleColor.trim() || suggestedColor.trim();
+
+  return (
+    <div className="space-y-3 lg:col-span-2">
+      <div>
+        <span className="text-sm font-semibold text-slate-200">
+          Linked Discord role
+        </span>
+        <span className="mt-1 block text-xs text-slate-500">
+          Kaelix can create a Discord role for this faction if one does not
+          exist yet.
+        </span>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setMode("existing")}
+          disabled={disabled}
+          className={`rounded-2xl border px-4 py-2 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+            mode === "existing"
+              ? "border-blue-400/40 bg-blue-500/15 text-blue-100"
+              : "border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.04]"
+          }`}
+        >
+          Link existing role
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("create")}
+          disabled={disabled}
+          className={`rounded-2xl border px-4 py-2 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+            mode === "create"
+              ? "border-blue-400/40 bg-blue-500/15 text-blue-100"
+              : "border-white/10 text-slate-300 hover:border-white/20 hover:bg-white/[0.04]"
+          }`}
+        >
+          Create new role
+        </button>
+      </div>
+
+      {mode === "existing" ? (
+        <DiscordRoleSelect
+          guildId={guildId}
+          rolesState={rolesState}
+          label=""
+          value={value}
+          disabled={disabled}
+          onChange={onChange}
+        />
+      ) : (
+        <div className="grid gap-3 md:grid-cols-[1fr_180px_auto] md:items-end">
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-200">
+              Role name
+            </span>
+            <input
+              type="text"
+              value={roleName}
+              disabled={disabled || isCreatingRole}
+              maxLength={100}
+              placeholder={suggestedName || "Faction role"}
+              onChange={(event) => setRoleName(event.target.value)}
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-400 disabled:opacity-60"
+            />
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-200">
+              Role color
+            </span>
+            <input
+              type="text"
+              value={roleColor}
+              disabled={disabled || isCreatingRole}
+              maxLength={7}
+              placeholder={suggestedColor || "#60a5fa"}
+              onChange={(event) => setRoleColor(event.target.value)}
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-400 disabled:opacity-60"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={() => onCreateRole(roleNameValue, roleColorValue)}
+            disabled={disabled || isCreatingRole || !roleNameValue}
+            className="rounded-2xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:bg-slate-600"
+          >
+            {isCreatingRole ? "Creating..." : "Create role"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Toggle({
   checked,
   disabled,
@@ -192,6 +313,95 @@ export default function FactionsManager({
   );
 
   const isBusy = busyAction !== null;
+
+  async function createDiscordRole(name: string, color: string) {
+    const response = await fetch(
+      `/api/servers/${encodeURIComponent(guildId)}/discord/roles/create`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          color: color.trim() || undefined,
+        }),
+      }
+    );
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(getErrorMessage(data, "Failed to create Discord role."));
+    }
+
+    if (!data?.role?.id || typeof data.role.id !== "string") {
+      throw new Error("Discord did not return a created role ID.");
+    }
+
+    rolesState.refresh();
+
+    return data.role as DiscordRole;
+  }
+
+  async function createRoleForDraft(
+    draft: FactionDraft,
+    onRoleId: (roleId: string) => void
+  ) {
+    setBusyAction("create-role");
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const role = await createDiscordRole(draft.name.trim(), draft.color);
+      onRoleId(role.id);
+      setSuccess("Discord role created and selected.");
+    } catch (roleError) {
+      setError(
+        roleError instanceof Error
+          ? roleError.message
+          : "Failed to create Discord role."
+      );
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function createRoleForFaction(factionId: number, draft: FactionDraft) {
+    setBusyAction(`create-role-${factionId}`);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const role = await createDiscordRole(draft.name.trim(), draft.color);
+      const response = await fetch(
+        `/api/servers/${encodeURIComponent(guildId)}/factions`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: factionId,
+            roleId: role.id,
+          }),
+        }
+      );
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          getErrorMessage(data, "Discord role was created, but linking failed.")
+        );
+      }
+
+      await refreshFactions();
+      setSuccess("Discord role created and linked.");
+    } catch (roleError) {
+      setError(
+        roleError instanceof Error
+          ? roleError.message
+          : "Failed to create and link Discord role."
+      );
+    } finally {
+      setBusyAction(null);
+    }
+  }
 
   async function refreshFactions() {
     const response = await fetch(
@@ -406,14 +616,23 @@ export default function FactionsManager({
             }
           />
 
-          <DiscordRoleSelect
+          <RoleLinkPanel
             guildId={guildId}
             rolesState={rolesState}
-            label="Linked Discord role"
             value={createDraft.roleId}
             disabled={isBusy}
+            suggestedName={createDraft.name}
+            suggestedColor={createDraft.color}
+            isCreatingRole={busyAction === "create-role"}
             onChange={(roleId) =>
               setCreateDraft((current) => ({ ...current, roleId }))
+            }
+            onCreateRole={(name, color) =>
+              createRoleForDraft(
+                { ...createDraft, name, color },
+                (roleId) =>
+                  setCreateDraft((current) => ({ ...current, roleId }))
+              )
             }
           />
 
@@ -543,17 +762,26 @@ export default function FactionsManager({
                     }
                   />
 
-                  <DiscordRoleSelect
+                  <RoleLinkPanel
                     guildId={guildId}
                     rolesState={rolesState}
-                    label="Linked Discord role"
                     value={draft.roleId}
                     disabled={isBusy}
+                    suggestedName={draft.name}
+                    suggestedColor={draft.color}
+                    isCreatingRole={busyAction === `create-role-${faction.id}`}
                     onChange={(roleId) =>
                       setEditing((current) => ({
                         ...current,
                         [faction.id]: { ...draft, roleId },
                       }))
+                    }
+                    onCreateRole={(name, color) =>
+                      createRoleForFaction(faction.id, {
+                        ...draft,
+                        name,
+                        color,
+                      })
                     }
                   />
 
