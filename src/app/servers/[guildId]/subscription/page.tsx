@@ -65,7 +65,10 @@ export default async function SubscriptionPage({
             ]}
           />
 
-          <SubscriptionPlanOptions currentPlan={subscription.plan} />
+          <SubscriptionPlanOptions
+            currentPlan={subscription.plan}
+            guildId={guildId}
+          />
         </div>
       ) : (
         <LoadError label="server subscription" />

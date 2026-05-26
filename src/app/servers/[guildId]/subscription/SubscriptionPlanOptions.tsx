@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useMemo } from "react";
 
 type PlanOption = {
   id: string;
@@ -23,14 +24,22 @@ const PLAN_OPTIONS: PlanOption[] = [
     name: "Core",
     price: "GBP 4.99/mo",
     summary: "Useful defaults for active communities.",
-    features: ["Activity configuration", "Onboarding controls", "Server logs"],
+    features: [
+      "Activity configuration",
+      "Onboarding controls",
+      "Server logs",
+    ],
   },
   {
     id: "pro",
     name: "Pro",
     price: "GBP 18.99/mo",
     summary: "More room for advanced community operations.",
-    features: ["Expanded analytics", "Priority setup options", "More automation"],
+    features: [
+      "Expanded analytics",
+      "Priority setup options",
+      "More automation",
+    ],
   },
 ];
 
@@ -53,36 +62,51 @@ function getButtonLabel(currentPlanId: string, planId: string) {
     return "Current plan";
   }
 
-  const currentIndex = PLAN_OPTIONS.findIndex((plan) => plan.id === currentPlanId);
-  const nextIndex = PLAN_OPTIONS.findIndex((plan) => plan.id === planId);
+  const currentIndex = PLAN_OPTIONS.findIndex(
+    (plan) => plan.id === currentPlanId
+  );
 
-  return nextIndex > currentIndex ? "Upgrade" : "Select plan";
+  const nextIndex = PLAN_OPTIONS.findIndex(
+    (plan) => plan.id === planId
+  );
+
+  return nextIndex > currentIndex
+    ? `Upgrade to ${planId.charAt(0).toUpperCase() + planId.slice(1)}`
+    : "Select plan";
 }
 
 export default function SubscriptionPlanOptions({
   currentPlan,
+  guildId,
 }: {
   currentPlan: string;
+  guildId: string;
 }) {
-  const currentPlanId = useMemo(() => normalizePlanId(currentPlan), [currentPlan]);
-  const [notice, setNotice] = useState<string | null>(null);
+  const currentPlanId = useMemo(
+    () => normalizePlanId(currentPlan),
+    [currentPlan]
+  );
 
   return (
     <section className="space-y-5 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-300">
-          Plan Options
-        </p>
-        <h2 className="mt-3 text-2xl font-bold text-white">
-          Choose a Kaelix tier
-        </h2>
-      </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-300">
+            Plan Options
+          </p>
 
-      {notice ? (
-        <div className="rounded-2xl border border-blue-300/20 bg-blue-400/10 p-4 text-sm leading-6 text-blue-100">
-          {notice}
+          <h2 className="mt-3 text-2xl font-bold text-white">
+            Choose a Kaelix tier
+          </h2>
         </div>
-      ) : null}
+
+        <Link
+          href={`/checkout?guildId=${guildId}`}
+          className="inline-flex items-center justify-center rounded-2xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-400"
+        >
+          Manage plan
+        </Link>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         {PLAN_OPTIONS.map((plan) => {
@@ -99,11 +123,15 @@ export default function SubscriptionPlanOptions({
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                  <h3 className="text-xl font-bold text-white">
+                    {plan.name}
+                  </h3>
+
                   <p className="mt-2 text-sm leading-6 text-slate-400">
                     {plan.summary}
                   </p>
                 </div>
+
                 <span className="whitespace-nowrap text-sm font-bold text-blue-200">
                   {plan.price}
                 </span>
@@ -115,18 +143,21 @@ export default function SubscriptionPlanOptions({
                 ))}
               </ul>
 
-              <button
-                type="button"
-                disabled={isCurrent}
-                onClick={() => setNotice("Checkout is not connected yet.")}
-                className={`mt-6 rounded-2xl px-5 py-3 text-sm font-bold transition ${
-                  isCurrent
-                    ? "cursor-not-allowed bg-slate-700 text-slate-300"
-                    : "bg-blue-500 text-white hover:bg-blue-400"
-                }`}
-              >
-                {getButtonLabel(currentPlanId, plan.id)}
-              </button>
+              {isCurrent ? (
+                <button
+                  disabled
+                  className="mt-6 cursor-not-allowed rounded-2xl bg-slate-700 px-5 py-3 text-sm font-bold text-slate-300"
+                >
+                  Current plan
+                </button>
+              ) : (
+                <Link
+                  href={`/checkout?guildId=${guildId}&plan=${plan.id}`}
+                  className="mt-6 inline-flex items-center justify-center rounded-2xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-400"
+                >
+                  {getButtonLabel(currentPlanId, plan.id)}
+                </Link>
+              )}
             </article>
           );
         })}

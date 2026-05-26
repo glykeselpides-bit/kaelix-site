@@ -11,56 +11,13 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const revalidate = 0;
 
-type OnboardingSettingsRecord = {
-  onboarding_enabled: boolean;
-  welcome_channel_id: string | null;
-  result_channel_id: string | null;
-  allow_retakes: boolean;
-  show_result_publicly: boolean;
-  auto_assign_faction_role: boolean;
-  onboarding_title: string | null;
-  onboarding_body: string | null;
-  quiz_enabled: boolean;
-  custom_factions_enabled: boolean;
-};
-
-type FactionRecord = {
-  id: number;
-  key: string;
-  name: string;
-  role_id: bigint | null;
-  is_active: boolean;
-};
-
-type QuizOptionRecord = {
-  id: number;
-  label: string;
-  faction_id: number | null;
-  weight: number;
-  position: number;
-  is_active: boolean;
-};
-
-type QuizQuestionRecord = {
-  id: number;
-  question: string;
-  position: number;
-  is_active: boolean;
-  faction_quiz_options: QuizOptionRecord[];
-};
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizeOptionalString(value: unknown) {
-  if (value === null || value === undefined) {
-    return null;
-  }
-
-  if (typeof value !== "string") {
-    return undefined;
-  }
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string") return undefined;
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
@@ -78,9 +35,7 @@ function parseOptionalSnowflake(
     return undefined;
   }
 
-  if (normalized === null) {
-    return null;
-  }
+  if (normalized === null) return null;
 
   if (!/^\d+$/.test(normalized)) {
     errors.push(`${fieldName} must be a Discord snowflake string.`);
@@ -90,7 +45,18 @@ function parseOptionalSnowflake(
   return normalized;
 }
 
-function toSettingsResponse(settings: OnboardingSettingsRecord) {
+function toSettingsResponse(settings: {
+  onboarding_enabled: boolean;
+  welcome_channel_id: string | null;
+  result_channel_id: string | null;
+  allow_retakes: boolean;
+  show_result_publicly: boolean;
+  auto_assign_faction_role: boolean;
+  onboarding_title: string | null;
+  onboarding_body: string | null;
+  quiz_enabled: boolean;
+  custom_factions_enabled: boolean;
+}) {
   return {
     onboardingEnabled: settings.onboarding_enabled,
     welcomeChannelId: settings.welcome_channel_id,
@@ -105,7 +71,13 @@ function toSettingsResponse(settings: OnboardingSettingsRecord) {
   };
 }
 
-function toFactionResponse(faction: FactionRecord) {
+function toFactionResponse(faction: {
+  id: number;
+  key: string;
+  name: string;
+  role_id: bigint | null;
+  is_active: boolean;
+}) {
   return {
     id: faction.id,
     key: faction.key,
@@ -117,7 +89,20 @@ function toFactionResponse(faction: FactionRecord) {
   };
 }
 
-function toQuestionResponse(question: QuizQuestionRecord) {
+function toQuestionResponse(question: {
+  id: number;
+  question: string;
+  position: number;
+  is_active: boolean;
+  faction_quiz_options: {
+    id: number;
+    label: string;
+    faction_id: number | null;
+    weight: number;
+    position: number;
+    is_active: boolean;
+  }[];
+}) {
   return {
     id: question.id,
     question: question.question,
@@ -140,6 +125,7 @@ function validateSettingsPatch(body: unknown) {
   }
 
   const errors: string[] = [];
+
   const data: Partial<{
     onboarding_enabled: boolean;
     welcome_channel_id: string | null;
@@ -179,9 +165,7 @@ function validateSettingsPatch(body: unknown) {
       errors
     );
 
-    if (channelId !== undefined) {
-      data.welcome_channel_id = channelId;
-    }
+    if (channelId !== undefined) data.welcome_channel_id = channelId;
   }
 
   if ("resultChannelId" in body) {
@@ -191,9 +175,7 @@ function validateSettingsPatch(body: unknown) {
       errors
     );
 
-    if (channelId !== undefined) {
-      data.result_channel_id = channelId;
-    }
+    if (channelId !== undefined) data.result_channel_id = channelId;
   }
 
   if ("onboardingTitle" in body) {
@@ -229,15 +211,14 @@ function validateSettingsPatch(body: unknown) {
 
 async function getOrCreateSettings(guildId: bigint) {
   const prisma = getPrisma();
-  const existingSettings = await prisma.onboarding_settings.findUnique({
+
+  const existing = await prisma.onboarding_settings.findUnique({
     where: { guild_id: guildId },
   });
 
-  if (existingSettings) {
-    return existingSettings;
-  }
+  if (existing) return existing;
 
-  const config = await prisma.guild_config.findUnique({
+  const legacyConfig = await prisma.guild_config.findUnique({
     where: { guild_id: guildId },
     select: {
       onboarding_enabled: true,
@@ -250,10 +231,16 @@ async function getOrCreateSettings(guildId: bigint) {
   return prisma.onboarding_settings.create({
     data: {
       guild_id: guildId,
-      onboarding_enabled: config?.onboarding_enabled ?? true,
-      welcome_channel_id: formatBigInt(config?.welcome_channel_id) ?? null,
-      allow_retakes: config?.allow_retake ?? false,
-      show_result_publicly: config?.result_visibility !== "private",
+      onboarding_enabled: legacyConfig?.onboarding_enabled ?? true,
+      welcome_channel_id: formatBigInt(legacyConfig?.welcome_channel_id) ?? null,
+      result_channel_id: null,
+      allow_retakes: legacyConfig?.allow_retake ?? false,
+      show_result_publicly: legacyConfig?.result_visibility !== "private",
+      auto_assign_faction_role: true,
+      onboarding_title: null,
+      onboarding_body: null,
+      quiz_enabled: true,
+      custom_factions_enabled: false,
     },
   });
 }
@@ -265,64 +252,60 @@ export async function GET(
   const { guildId } = await params;
   const guildIdBigInt = parseGuildId(guildId);
 
-  if (!guildIdBigInt) {
-    return invalidGuildIdResponse();
-  }
+  if (!guildIdBigInt) return invalidGuildIdResponse();
 
   try {
     const prisma = getPrisma();
-    const [
-      settings,
-      questions,
-      factions,
-      completedSessionsCount,
-      assignedUsers,
-    ] = await Promise.all([
-      getOrCreateSettings(guildIdBigInt),
-      prisma.faction_quiz_questions.findMany({
-        where: { guild_id: guildIdBigInt },
-        orderBy: [{ position: "asc" }, { id: "asc" }],
-        select: {
-          id: true,
-          question: true,
-          position: true,
-          is_active: true,
-          faction_quiz_options: {
-            orderBy: [{ position: "asc" }, { id: "asc" }],
-            select: {
-              id: true,
-              label: true,
-              faction_id: true,
-              weight: true,
-              position: true,
-              is_active: true,
+
+    const settings = await getOrCreateSettings(guildIdBigInt);
+
+    const [questions, factions, completedSessionsCount, assignedUsersCount] =
+      await Promise.all([
+        prisma.faction_quiz_questions.findMany({
+          where: { guild_id: guildIdBigInt },
+          orderBy: [{ position: "asc" }, { id: "asc" }],
+          select: {
+            id: true,
+            question: true,
+            position: true,
+            is_active: true,
+            faction_quiz_options: {
+              orderBy: [{ position: "asc" }, { id: "asc" }],
+              select: {
+                id: true,
+                label: true,
+                faction_id: true,
+                weight: true,
+                position: true,
+                is_active: true,
+              },
             },
           },
-        },
-      }),
-      prisma.factions.findMany({
-        where: { guild_id: guildIdBigInt, is_active: true },
-        orderBy: [{ name: "asc" }],
-        select: {
-          id: true,
-          key: true,
-          name: true,
-          role_id: true,
-          is_active: true,
-        },
-      }),
-      prisma.onboarding_sessions.count({
-        where: {
-          guild_id: guildIdBigInt,
-          OR: [{ status: "completed" }, { completed_at: { not: null } }],
-        },
-      }),
-      prisma.user_factions.findMany({
-        where: { guild_id: guildIdBigInt },
-        distinct: ["user_id"],
-        select: { user_id: true },
-      }),
-    ]);
+        }),
+
+        prisma.factions.findMany({
+          where: { guild_id: guildIdBigInt, is_active: true },
+          orderBy: [{ name: "asc" }],
+          select: {
+            id: true,
+            key: true,
+            name: true,
+            role_id: true,
+            is_active: true,
+          },
+        }),
+
+        prisma.onboarding_sessions.count({
+          where: {
+            guild_id: guildIdBigInt,
+            OR: [{ status: "completed" }, { completed_at: { not: null } }],
+          },
+        }),
+
+        prisma.user_factions.count({
+          where: { guild_id: guildIdBigInt },
+        }),
+      ]);
 
     return NextResponse.json({
       found: true,
@@ -334,7 +317,7 @@ export async function GET(
         activeQuestionCount: questions.filter((question) => question.is_active)
           .length,
         completedSessionsCount,
-        assignedUsersCount: assignedUsers.length,
+        assignedUsersCount,
       },
     });
   } catch (error) {
@@ -354,9 +337,7 @@ export async function PATCH(
   const { guildId } = await params;
   const guildIdBigInt = parseGuildId(guildId);
 
-  if (!guildIdBigInt) {
-    return invalidGuildIdResponse();
-  }
+  if (!guildIdBigInt) return invalidGuildIdResponse();
 
   let body: unknown;
 
@@ -377,6 +358,7 @@ export async function PATCH(
 
   try {
     const prisma = getPrisma();
+
     const updatedSettings = await prisma.onboarding_settings.upsert({
       where: { guild_id: guildIdBigInt },
       create: {
