@@ -494,21 +494,9 @@ export default function TriviaQuestionsManager({
       </div>
 
       <div className="flex flex-wrap gap-3 border-b border-white/10 pb-5">
-        {["Trivia Questions", "Riddles", "Prompts", "Word lists"].map(
-          (item, index) => (
-            <span
-              key={item}
-              className={`rounded-2xl border px-4 py-2 text-sm font-bold ${
-                index === 0
-                  ? "border-blue-300/40 bg-blue-400/10 text-blue-100"
-                  : "border-white/10 bg-black/20 text-slate-500 opacity-70"
-              }`}
-              aria-disabled={index > 0}
-            >
-              {index === 0 ? item : `${item} soon`}
-            </span>
-          )
-        )}
+        <span className="rounded-2xl border border-blue-300/40 bg-blue-400/10 px-4 py-2 text-sm font-bold text-blue-100">
+          Trivia Questions
+        </span>
       </div>
 
       {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}

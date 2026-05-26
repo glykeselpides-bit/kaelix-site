@@ -1,4 +1,5 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
+import { LoadError } from "@/components/ServerReadOnlySection";
 import { fetchServerSection } from "@/lib/dashboardFetch";
 import OnboardingManager, {
   type OnboardingFaction,
@@ -38,13 +39,16 @@ export default async function OnboardingPage({
       title="Onboarding"
       description="Manage onboarding processes, tutorials, and user initiation workflows."
     >
-      <OnboardingManager
-        guildId={guildId}
-        initialSettings={settings}
-        initialQuestions={data?.questions ?? []}
-        factions={data?.factions ?? []}
-        loadError={!settings}
-      />
+      {data ? (
+        <OnboardingManager
+          guildId={guildId}
+          initialSettings={settings}
+          initialQuestions={data.questions ?? []}
+          factions={data.factions ?? []}
+        />
+      ) : (
+        <LoadError label="server onboarding" />
+      )}
     </ServerSectionPlaceholder>
   );
 }

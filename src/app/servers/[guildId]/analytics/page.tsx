@@ -1,6 +1,5 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
 import {
-  InfoNotice,
   LoadError,
   MetricGrid,
 } from "@/components/ServerReadOnlySection";
@@ -53,10 +52,6 @@ export default async function AnalyticsPage({
               },
             ]}
           />
-          <InfoNotice>
-            Detailed analytics are not available yet. These cards use the
-            current dashboard data that is safe to summarize.
-          </InfoNotice>
         </div>
       ) : (
         <LoadError label="server analytics" />

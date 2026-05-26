@@ -1,7 +1,6 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
 import {
   DetailsGrid,
-  InfoNotice,
   LoadError,
   formatDashboardDate,
 } from "@/components/ServerReadOnlySection";
@@ -64,9 +63,6 @@ export default async function SubscriptionPage({
               },
             ]}
           />
-          {!subscription.billingActive ? (
-            <InfoNotice>Billing controls are not available yet.</InfoNotice>
-          ) : null}
         </div>
       ) : (
         <LoadError label="server subscription" />

@@ -8,7 +8,6 @@ import {
 } from "@/components/DiscordResourceSelects";
 import {
   ErrorNotice,
-  InfoNotice,
   SuccessNotice,
 } from "@/components/ServerReadOnlySection";
 
@@ -295,13 +294,11 @@ export default function OnboardingManager({
   initialSettings,
   initialQuestions,
   factions,
-  loadError,
 }: {
   guildId: string;
   initialSettings: Partial<OnboardingSettings> | null;
   initialQuestions: OnboardingQuizQuestion[];
   factions: OnboardingFaction[];
-  loadError: boolean;
 }) {
   const safeInitialSettings = useMemo(
     () => normalizeSettings(initialSettings),
@@ -324,11 +321,6 @@ export default function OnboardingManager({
     Record<number, OptionDraft>
   >({});
   const [busyAction, setBusyAction] = useState<string | null>(null);
-  const [loadNotice] = useState<string | null>(
-    loadError
-      ? "Safe onboarding defaults are shown until saved settings are available."
-      : null
-  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const channelsState = useDiscordChannels(guildId);
@@ -662,7 +654,6 @@ export default function OnboardingManager({
 
   return (
     <div className="space-y-6">
-      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
       {error ? <ErrorNotice>{error}</ErrorNotice> : null}
       {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
