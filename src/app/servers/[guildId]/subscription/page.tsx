@@ -5,6 +5,7 @@ import {
   formatDashboardDate,
 } from "@/components/ServerReadOnlySection";
 import { fetchServerSection } from "@/lib/dashboardFetch";
+import SubscriptionPlanOptions from "./SubscriptionPlanOptions";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -63,6 +64,8 @@ export default async function SubscriptionPage({
               },
             ]}
           />
+
+          <SubscriptionPlanOptions currentPlan={subscription.plan} />
         </div>
       ) : (
         <LoadError label="server subscription" />

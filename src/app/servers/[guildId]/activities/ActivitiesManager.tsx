@@ -8,7 +8,6 @@ import {
 } from "@/components/DiscordResourceSelects";
 import {
   ErrorNotice,
-  InfoNotice,
   SuccessNotice,
 } from "@/components/ServerReadOnlySection";
 
@@ -133,11 +132,9 @@ function NumberInput({
 export default function ActivitiesManager({
   guildId,
   initialActivities,
-  loadError,
 }: {
   guildId: string;
   initialActivities: ActivitySetting[];
-  loadError: boolean;
 }) {
   const channelsState = useDiscordChannels(guildId);
   const { items: channels } = channelsState;
@@ -154,9 +151,6 @@ export default function ActivitiesManager({
     )
   );
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [loadNotice] = useState<string | null>(
-    loadError ? "Activity defaults are shown until saved settings are available." : null
-  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -277,7 +271,6 @@ export default function ActivitiesManager({
 
   return (
     <section className="space-y-5">
-      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
       {error ? <ErrorNotice>{error}</ErrorNotice> : null}
       {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
