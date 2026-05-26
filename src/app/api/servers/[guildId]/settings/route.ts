@@ -4,6 +4,7 @@ import {
   invalidGuildIdResponse,
   parseGuildId,
 } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
@@ -364,6 +365,18 @@ export async function PATCH(
     const updatedConfig = await prisma.guild_config.update({
       where: { guild_id: guildIdBigInt },
       data: updateData,
+    });
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "UPDATE",
+      entityType: "SETTINGS",
+      entityId: guildId,
+      summary: "Updated server settings",
+      metadata: {
+        fields: Object.keys(updateData),
+        extraSettingsFields: Object.keys(validation.extraSettingsPatch),
+      },
     });
 
     return NextResponse.json({

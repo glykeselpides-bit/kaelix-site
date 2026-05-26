@@ -5,6 +5,7 @@ import {
   invalidGuildIdResponse,
   parseGuildId,
 } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
@@ -521,6 +522,19 @@ export async function POST(
       select: triviaQuestionSelect,
     });
 
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: question.is_active ? "CREATE" : "DISABLE",
+      entityType: "TRIVIA_QUESTION",
+      entityId: question.id,
+      summary: `Created trivia question "${question.question}"`,
+      metadata: {
+        category: question.category,
+        difficulty: question.difficulty,
+        rewardPoints: question.reward_points,
+      },
+    });
+
     return NextResponse.json(
       { question: toQuestionResponse(question) },
       { status: 201 }
@@ -586,6 +600,27 @@ export async function PATCH(
       select: triviaQuestionSelect,
     });
 
+    const actionType =
+      typeof validation.data.is_active === "boolean"
+        ? validation.data.is_active
+          ? "ENABLE"
+          : "DISABLE"
+        : "UPDATE";
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType,
+      entityType: "TRIVIA_QUESTION",
+      entityId: question.id,
+      summary:
+        actionType === "ENABLE"
+          ? `Enabled trivia question #${question.id}`
+          : actionType === "DISABLE"
+            ? `Disabled trivia question #${question.id}`
+            : `Updated trivia question #${question.id}`,
+      metadata: { fields: Object.keys(validation.data) },
+    });
+
     return NextResponse.json({ question: toQuestionResponse(question) });
   } catch (error) {
     console.error("Failed to update trivia question", { guildId, error });
@@ -646,6 +681,15 @@ export async function DELETE(
       where: { id: validation.id },
       data: { is_active: false },
       select: triviaQuestionSelect,
+    });
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "DELETE",
+      entityType: "TRIVIA_QUESTION",
+      entityId: question.id,
+      summary: `Deactivated trivia question #${question.id}`,
+      metadata: { softDelete: true, question: question.question },
     });
 
     return NextResponse.json({

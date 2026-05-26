@@ -5,6 +5,7 @@ import {
   invalidGuildIdResponse,
   parseGuildId,
 } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
@@ -486,6 +487,34 @@ export async function PATCH(
           },
         })
       )
+    );
+
+    await Promise.all(
+      validation.activities.map((activity) => {
+        const actionType =
+          typeof activity.enabled === "boolean"
+            ? activity.enabled
+              ? "ENABLE"
+              : "DISABLE"
+            : "UPDATE";
+
+        return logDashboardAction({
+          guildId: guildIdBigInt,
+          actionType,
+          entityType: "ACTIVITY",
+          entityId: activity.activityKey,
+          summary:
+            actionType === "ENABLE"
+              ? `Enabled ${activity.activityKey} activity`
+              : actionType === "DISABLE"
+                ? `Disabled ${activity.activityKey} activity`
+                : `Updated ${activity.activityKey} activity settings`,
+          metadata: {
+            activityKey: activity.activityKey,
+            fields: Object.keys(activity).filter((key) => key !== "activityKey"),
+          },
+        });
+      })
     );
 
     return NextResponse.json(await getActivityPayload(guildIdBigInt));

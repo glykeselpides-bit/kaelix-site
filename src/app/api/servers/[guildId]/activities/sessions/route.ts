@@ -4,6 +4,7 @@ import {
   invalidGuildIdResponse,
   parseGuildId,
 } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -422,6 +423,19 @@ export async function PATCH(
         { status: 409 }
       );
     }
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "END_SESSION",
+      entityType: "ACTIVITY",
+      entityId: `${validation.activityKey}:${validation.sessionId}`,
+      summary: `Ended ${config.label} session #${validation.sessionId}`,
+      metadata: {
+        activityKey: validation.activityKey,
+        sessionId: validation.sessionId,
+        endedAt: now,
+      },
+    });
 
     return NextResponse.json({
       ended: true,

@@ -5,6 +5,7 @@ import {
   invalidGuildIdResponse,
   parseGuildId,
 } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
@@ -382,6 +383,19 @@ export async function POST(
       guild_id: guildIdBigInt,
     });
 
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "CREATE",
+      entityType: "EVENT",
+      entityId: event.id,
+      summary: `Created event "${event.name}"`,
+      metadata: {
+        eventCode: event.event_code,
+        startsAt: event.starts_at,
+        channelId: event.channel_id,
+      },
+    });
+
     return NextResponse.json(
       { event: toEventResponse(event) },
       { status: 201 }
@@ -454,6 +468,23 @@ export async function PATCH(
       select: eventSelect,
     });
 
+    const actionType = validation.data.status === "cancelled" ? "DELETE" : "UPDATE";
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType,
+      entityType: "EVENT",
+      entityId: event.id,
+      summary:
+        actionType === "DELETE"
+          ? `Cancelled event "${event.name}"`
+          : `Updated event "${event.name}"`,
+      metadata: {
+        eventCode: event.event_code,
+        fields: Object.keys(validation.data),
+      },
+    });
+
     return NextResponse.json({ event: toEventResponse(event) });
   } catch (error) {
     console.error("Failed to update server event", error);
@@ -514,6 +545,15 @@ export async function DELETE(
       where: { id: validation.id },
       data: { status: "cancelled" },
       select: eventSelect,
+    });
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "DELETE",
+      entityType: "EVENT",
+      entityId: event.id,
+      summary: `Cancelled event "${event.name}"`,
+      metadata: { eventCode: event.event_code, softDelete: true },
     });
 
     return NextResponse.json({

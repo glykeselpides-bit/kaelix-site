@@ -4,6 +4,7 @@ import {
   invalidGuildIdResponse,
   parseGuildId,
 } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -383,6 +384,27 @@ export async function PATCH(
         ...validation.data,
       },
       update: validation.data,
+    });
+
+    const actionType =
+      typeof validation.data.onboarding_enabled === "boolean"
+        ? validation.data.onboarding_enabled
+          ? "ENABLE"
+          : "DISABLE"
+        : "UPDATE";
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType,
+      entityType: "ONBOARDING",
+      entityId: guildId,
+      summary:
+        actionType === "ENABLE"
+          ? "Enabled onboarding"
+          : actionType === "DISABLE"
+            ? "Disabled onboarding"
+            : "Updated onboarding settings",
+      metadata: { fields: Object.keys(validation.data) },
     });
 
     return NextResponse.json({

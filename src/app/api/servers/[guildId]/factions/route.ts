@@ -5,6 +5,7 @@ import {
   invalidGuildIdResponse,
   parseGuildId,
 } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 
@@ -369,6 +370,15 @@ export async function POST(
       },
     });
 
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: faction.is_active ? "CREATE" : "DISABLE",
+      entityType: "FACTION",
+      entityId: faction.id,
+      summary: `Created faction "${faction.name}"`,
+      metadata: { key: faction.key, roleId: faction.role_id },
+    });
+
     return NextResponse.json(
       { faction: toFactionResponse(faction) },
       { status: 201 }
@@ -425,7 +435,7 @@ export async function PATCH(
         id: validation.id,
         guild_id: guildIdBigInt,
       },
-      select: { id: true },
+      select: { id: true, name: true, is_active: true },
     });
 
     if (!existingFaction) {
@@ -449,6 +459,30 @@ export async function PATCH(
         is_active: true,
         created_at: true,
         updated_at: true,
+      },
+    });
+
+    const actionType =
+      typeof validation.data.is_active === "boolean"
+        ? validation.data.is_active
+          ? "ENABLE"
+          : "DISABLE"
+        : "UPDATE";
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType,
+      entityType: "FACTION",
+      entityId: faction.id,
+      summary:
+        actionType === "ENABLE"
+          ? `Enabled faction "${faction.name}"`
+          : actionType === "DISABLE"
+            ? `Disabled faction "${faction.name}"`
+            : `Updated faction "${faction.name}"`,
+      metadata: {
+        previous: { name: existingFaction.name, isActive: existingFaction.is_active },
+        fields: Object.keys(validation.data),
       },
     });
 
@@ -498,7 +532,7 @@ export async function DELETE(
         id: validation.id,
         guild_id: guildIdBigInt,
       },
-      select: { id: true },
+      select: { id: true, name: true },
     });
 
     if (!existingFaction) {
@@ -526,6 +560,15 @@ export async function DELETE(
         created_at: true,
         updated_at: true,
       },
+    });
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "DELETE",
+      entityType: "FACTION",
+      entityId: faction.id,
+      summary: `Deactivated faction "${faction.name}"`,
+      metadata: { previousName: existingFaction.name, softDelete: true },
     });
 
     return NextResponse.json({

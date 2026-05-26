@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { invalidGuildIdResponse, parseGuildId } from "@/lib/dashboardApi";
+import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -395,6 +396,15 @@ export async function POST(
         select: { id: true },
       });
 
+      await logDashboardAction({
+        guildId: guildIdBigInt,
+        actionType: "CREATE",
+        entityType: "ONBOARDING",
+        entityId: `quiz-option:${option.id}`,
+        summary: `Created onboarding quiz option #${option.id}`,
+        metadata: { questionId: validation.questionId },
+      });
+
       return NextResponse.json({ optionId: option.id }, { status: 201 });
     }
 
@@ -426,6 +436,18 @@ export async function POST(
         },
       },
       select: { id: true },
+    });
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "CREATE",
+      entityType: "ONBOARDING",
+      entityId: `quiz-question:${question.id}`,
+      summary: `Created onboarding quiz question #${question.id}`,
+      metadata: {
+        optionCount: validation.options.length,
+        isActive: validation.isActive,
+      },
     });
 
     return NextResponse.json({ questionId: question.id }, { status: 201 });
@@ -488,6 +510,20 @@ export async function PATCH(
         data: validation.data,
       });
 
+      await logDashboardAction({
+        guildId: guildIdBigInt,
+        actionType:
+          typeof validation.data.is_active === "boolean"
+            ? validation.data.is_active
+              ? "ENABLE"
+              : "DISABLE"
+            : "UPDATE",
+        entityType: "ONBOARDING",
+        entityId: `quiz-question:${validation.id}`,
+        summary: `Updated onboarding quiz question #${validation.id}`,
+        metadata: { fields: Object.keys(validation.data) },
+      });
+
       return NextResponse.json({ updated: true, type: "question" });
     }
 
@@ -522,6 +558,20 @@ export async function PATCH(
     await prisma.faction_quiz_options.update({
       where: { id: validation.id },
       data: validation.data,
+    });
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType:
+        typeof validation.data.is_active === "boolean"
+          ? validation.data.is_active
+            ? "ENABLE"
+            : "DISABLE"
+          : "UPDATE",
+      entityType: "ONBOARDING",
+      entityId: `quiz-option:${validation.id}`,
+      summary: `Updated onboarding quiz option #${validation.id}`,
+      metadata: { fields: Object.keys(validation.data) },
     });
 
     return NextResponse.json({ updated: true, type: "option" });
@@ -584,6 +634,15 @@ export async function DELETE(
         data: { is_active: false },
       });
 
+      await logDashboardAction({
+        guildId: guildIdBigInt,
+        actionType: "DELETE",
+        entityType: "ONBOARDING",
+        entityId: `quiz-question:${validation.id}`,
+        summary: `Deactivated onboarding quiz question #${validation.id}`,
+        metadata: { softDelete: true },
+      });
+
       return NextResponse.json({ deactivated: true, type: "question" });
     }
 
@@ -605,6 +664,15 @@ export async function DELETE(
     await prisma.faction_quiz_options.update({
       where: { id: validation.id },
       data: { is_active: false },
+    });
+
+    await logDashboardAction({
+      guildId: guildIdBigInt,
+      actionType: "DELETE",
+      entityType: "ONBOARDING",
+      entityId: `quiz-option:${validation.id}`,
+      summary: `Deactivated onboarding quiz option #${validation.id}`,
+      metadata: { softDelete: true },
     });
 
     return NextResponse.json({ deactivated: true, type: "option" });
