@@ -1,5 +1,9 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
-import { LoadError, MetricGrid } from "@/components/ServerReadOnlySection";
+import {
+  InfoNotice,
+  LoadError,
+  MetricGrid,
+} from "@/components/ServerReadOnlySection";
 import { fetchServerSection } from "@/lib/dashboardFetch";
 
 export const dynamic = "force-dynamic";
@@ -32,22 +36,28 @@ export default async function AnalyticsPage({
       description="View and analyze server performance, user engagement, and system metrics."
     >
       {metrics ? (
-        <MetricGrid
-          metrics={[
-            { label: "Tracked Users", value: metrics.trackedUsers },
-            { label: "Total Points", value: metrics.totalPoints },
-            { label: "Events Count", value: metrics.eventsCount },
-            { label: "Factions Count", value: metrics.factionsCount },
-            {
-              label: "Participation Count",
-              value: metrics.participationCount,
-            },
-            {
-              label: "Point Transactions",
-              value: metrics.pointTransactionsCount,
-            },
-          ]}
-        />
+        <div className="space-y-5">
+          <MetricGrid
+            metrics={[
+              { label: "Tracked Users", value: metrics.trackedUsers },
+              { label: "Total Points", value: metrics.totalPoints },
+              { label: "Events Hosted", value: metrics.eventsCount },
+              { label: "Active Factions", value: metrics.factionsCount },
+              {
+                label: "Activity Sessions",
+                value: metrics.participationCount,
+              },
+              {
+                label: "Point Transactions",
+                value: metrics.pointTransactionsCount,
+              },
+            ]}
+          />
+          <InfoNotice>
+            Detailed analytics are not available yet. These cards use the
+            current dashboard data that is safe to summarize.
+          </InfoNotice>
+        </div>
       ) : (
         <LoadError label="server analytics" />
       )}

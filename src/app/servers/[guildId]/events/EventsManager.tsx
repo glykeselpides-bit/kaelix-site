@@ -6,6 +6,11 @@ import {
   type DiscordChannel,
   useDiscordChannels,
 } from "@/components/DiscordResourceSelects";
+import {
+  ErrorNotice,
+  InfoNotice,
+  SuccessNotice,
+} from "@/components/ServerReadOnlySection";
 
 export type EventItem = {
   id: number;
@@ -548,9 +553,10 @@ export default function EventsManager({
   );
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(
-    loadError ? "Events could not be loaded." : null
+  const [loadNotice] = useState<string | null>(
+    loadError ? "Event defaults are shown until saved events are available." : null
   );
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const openCount = useMemo(
@@ -718,17 +724,9 @@ export default function EventsManager({
 
   return (
     <div className="space-y-6">
-      {(error || success) && (
-        <div
-          className={`rounded-2xl border p-4 text-sm ${
-            error
-              ? "border-red-500/20 bg-red-500/10 text-red-100"
-              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-          }`}
-        >
-          {error ?? success}
-        </div>
-      )}
+      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
+      {error ? <ErrorNotice>{error}</ErrorNotice> : null}
+      {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
         <div className="flex flex-wrap items-start justify-between gap-4">

@@ -1,6 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  ErrorNotice,
+  InfoNotice,
+  SuccessNotice,
+} from "@/components/ServerReadOnlySection";
 
 export type TriviaQuestion = {
   id: number;
@@ -286,9 +291,10 @@ export default function TriviaQuestionsManager({
   const [categoryFilter, setCategoryFilter] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("");
   const [busyAction, setBusyAction] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(
+  const [loadNotice] = useState<string | null>(
     normalizedInitial.warnings?.[0] ?? null
   );
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const isBusy = busyAction !== null;
@@ -490,33 +496,24 @@ export default function TriviaQuestionsManager({
       <div className="flex flex-wrap gap-3 border-b border-white/10 pb-5">
         {["Trivia Questions", "Riddles", "Prompts", "Word lists"].map(
           (item, index) => (
-            <button
+            <span
               key={item}
-              type="button"
-              disabled={index > 0}
               className={`rounded-2xl border px-4 py-2 text-sm font-bold ${
                 index === 0
                   ? "border-blue-300/40 bg-blue-400/10 text-blue-100"
-                  : "cursor-not-allowed border-white/10 bg-black/20 text-slate-500"
+                  : "border-white/10 bg-black/20 text-slate-500 opacity-70"
               }`}
+              aria-disabled={index > 0}
             >
               {index === 0 ? item : `${item} soon`}
-            </button>
+            </span>
           )
         )}
       </div>
 
-      {(error || success) && (
-        <div
-          className={`rounded-2xl border p-4 text-sm ${
-            error
-              ? "border-red-500/20 bg-red-500/10 text-red-100"
-              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-          }`}
-        >
-          {error ?? success}
-        </div>
-      )}
+      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
+      {error ? <ErrorNotice>{error}</ErrorNotice> : null}
+      {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
       <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -580,9 +577,9 @@ export default function TriviaQuestionsManager({
       ) : null}
 
       {filteredQuestions.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-black/20 p-8 text-slate-300">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-6 text-slate-300">
           {questions.length === 0
-            ? "No trivia questions yet."
+            ? "No trivia questions yet. Create your first question to start building your activity pool."
             : "No trivia questions match this view."}
         </div>
       ) : (

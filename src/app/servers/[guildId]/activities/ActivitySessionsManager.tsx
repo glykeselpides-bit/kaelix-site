@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { formatDashboardDate } from "@/components/ServerReadOnlySection";
+import {
+  ErrorNotice,
+  InfoNotice,
+  SuccessNotice,
+  formatDashboardDate,
+} from "@/components/ServerReadOnlySection";
 
 export type ActivitySession = {
   id: number;
@@ -166,20 +171,14 @@ export default function ActivitySessionsManager({
         </button>
       </div>
 
-      {(error || success || payload.warnings?.length) && (
-        <div
-          className={`rounded-2xl border p-4 text-sm ${
-            error
-              ? "border-red-500/20 bg-red-500/10 text-red-100"
-              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-          }`}
-        >
-          {error ?? success ?? payload.warnings?.[0]}
-        </div>
-      )}
+      {payload.warnings?.length ? (
+        <InfoNotice>{payload.warnings[0]}</InfoNotice>
+      ) : null}
+      {error ? <ErrorNotice>{error}</ErrorNotice> : null}
+      {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
       {payload.activeSessions.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-slate-300">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-slate-300">
           {isLoading
             ? "Loading active sessions..."
             : "No activity games are currently running."}

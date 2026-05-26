@@ -1,5 +1,5 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
-import { MetricGrid } from "@/components/ServerReadOnlySection";
+import { InfoNotice, MetricGrid } from "@/components/ServerReadOnlySection";
 import { fetchServerSection } from "@/lib/dashboardFetch";
 import ActivitiesManager, { type ActivitySetting } from "./ActivitiesManager";
 import ActivitySessionsManager, {
@@ -41,7 +41,7 @@ const fallbackActivitiesData: ActivitiesData = {
   },
   activities: [],
   recentSessions: [],
-  warnings: ["Activities could not be loaded."],
+  warnings: ["Activity defaults are shown until saved settings are available."],
 };
 
 const fallbackSessionsData: SessionsPayload = {
@@ -53,7 +53,7 @@ const fallbackSessionsData: SessionsPayload = {
 const fallbackTriviaData: TriviaData = {
   questions: [],
   total: 0,
-  warnings: ["Trivia questions could not be loaded."],
+  warnings: ["Trivia question defaults are shown until saved content is available."],
 };
 
 function normalizeActivitiesData(data: ActivitiesData | null): ActivitiesData {
@@ -148,9 +148,7 @@ export default async function ActivitiesPage({
     >
       <div className="space-y-6">
         {data.warnings?.length ? (
-          <div className="rounded-3xl border border-amber-400/20 bg-amber-400/10 p-5 text-sm text-amber-100">
-            {data.warnings[0]}
-          </div>
+          <InfoNotice>{data.warnings[0]}</InfoNotice>
         ) : null}
 
         <MetricGrid

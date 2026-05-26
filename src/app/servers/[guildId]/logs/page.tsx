@@ -2,6 +2,7 @@ import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
 import {
   DataTable,
   EmptyValue,
+  InfoNotice,
   LoadError,
   formatDashboardDate,
 } from "@/components/ServerReadOnlySection";
@@ -23,6 +24,7 @@ type LogItem = {
 
 type LogsData = {
   logs: LogItem[];
+  warning?: string;
 };
 
 const ACTION_STYLES: Record<string, string> = {
@@ -92,42 +94,45 @@ export default async function LogsPage({
       description="Review dashboard actions that changed this server."
     >
       {data ? (
-        <DataTable
-          emptyText="No dashboard actions have been logged for this server yet."
-          items={data.logs}
-          columns={[
-            {
-              key: "actionType",
-              label: "Action",
-              render: (log) => <ActionBadge action={log.actionType} />,
-            },
-            {
-              key: "entityType",
-              label: "Entity",
-              render: (log) => <EntityLabel log={log} />,
-            },
-            {
-              key: "summary",
-              label: "Summary",
-              render: (log) => log.summary,
-            },
-            {
-              key: "userId",
-              label: "Actor",
-              render: (log) => log.userId ?? <EmptyValue />,
-            },
-            {
-              key: "metadata",
-              label: "Metadata",
-              render: (log) => <MetadataDetails metadata={log.metadata} />,
-            },
-            {
-              key: "createdAt",
-              label: "Timestamp",
-              render: (log) => formatDashboardDate(log.createdAt),
-            },
-          ]}
-        />
+        <div className="space-y-5">
+          {data.warning ? <InfoNotice>{data.warning}</InfoNotice> : null}
+          <DataTable
+            emptyText="No dashboard actions recorded yet."
+            items={data.logs}
+            columns={[
+              {
+                key: "actionType",
+                label: "Action",
+                render: (log) => <ActionBadge action={log.actionType} />,
+              },
+              {
+                key: "entityType",
+                label: "Entity",
+                render: (log) => <EntityLabel log={log} />,
+              },
+              {
+                key: "summary",
+                label: "Summary",
+                render: (log) => log.summary,
+              },
+              {
+                key: "userId",
+                label: "Actor",
+                render: (log) => log.userId ?? <EmptyValue />,
+              },
+              {
+                key: "metadata",
+                label: "Metadata",
+                render: (log) => <MetadataDetails metadata={log.metadata} />,
+              },
+              {
+                key: "createdAt",
+                label: "Timestamp",
+                render: (log) => formatDashboardDate(log.createdAt),
+              },
+            ]}
+          />
+        </div>
       ) : (
         <LoadError label="server logs" />
       )}

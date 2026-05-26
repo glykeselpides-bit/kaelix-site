@@ -1,6 +1,7 @@
 import ServerSectionPlaceholder from "@/components/ServerSectionPlaceholder";
 import {
   DetailsGrid,
+  InfoNotice,
   LoadError,
   formatDashboardDate,
 } from "@/components/ServerReadOnlySection";
@@ -17,6 +18,7 @@ type SubscriptionData = {
     trialEndsAt: string | null;
     currentPeriodEnd: string | null;
     cancelAtPeriodEnd: boolean;
+    billingActive?: boolean;
   };
 };
 
@@ -39,28 +41,33 @@ export default async function SubscriptionPage({
       description="Manage subscription plans, billing, and user access levels."
     >
       {subscription ? (
-        <DetailsGrid
-          items={[
-            { label: "Plan", value: subscription.plan },
-            { label: "Status", value: subscription.status },
-            {
-              label: "Trial Used",
-              value: subscription.trialUsed ? "Yes" : "No",
-            },
-            {
-              label: "Trial Ends At",
-              value: formatDashboardDate(subscription.trialEndsAt),
-            },
-            {
-              label: "Current Period End",
-              value: formatDashboardDate(subscription.currentPeriodEnd),
-            },
-            {
-              label: "Cancel At Period End",
-              value: subscription.cancelAtPeriodEnd ? "Yes" : "No",
-            },
-          ]}
-        />
+        <div className="space-y-5">
+          <DetailsGrid
+            items={[
+              { label: "Current plan", value: subscription.plan },
+              { label: "Plan status", value: subscription.status },
+              {
+                label: "Trial used",
+                value: subscription.trialUsed ? "Yes" : "No",
+              },
+              {
+                label: "Trial ends",
+                value: formatDashboardDate(subscription.trialEndsAt),
+              },
+              {
+                label: "Renewal date",
+                value: formatDashboardDate(subscription.currentPeriodEnd),
+              },
+              {
+                label: "Cancels at period end",
+                value: subscription.cancelAtPeriodEnd ? "Yes" : "No",
+              },
+            ]}
+          />
+          {!subscription.billingActive ? (
+            <InfoNotice>Billing controls are not available yet.</InfoNotice>
+          ) : null}
+        </div>
       ) : (
         <LoadError label="server subscription" />
       )}

@@ -6,6 +6,11 @@ import {
   type DiscordRole,
   useDiscordRoles,
 } from "@/components/DiscordResourceSelects";
+import {
+  ErrorNotice,
+  InfoNotice,
+  SuccessNotice,
+} from "@/components/ServerReadOnlySection";
 
 export type FactionItem = {
   id: number;
@@ -302,9 +307,10 @@ export default function FactionsManager({
     )
   );
   const [busyAction, setBusyAction] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(
-    loadError ? "Factions could not be loaded." : null
+  const [loadNotice] = useState<string | null>(
+    loadError ? "Faction defaults are shown until saved factions are available." : null
   );
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const activeCount = useMemo(
@@ -544,17 +550,9 @@ export default function FactionsManager({
 
   return (
     <div className="space-y-6">
-      {(error || success) && (
-        <div
-          className={`rounded-2xl border p-4 text-sm ${
-            error
-              ? "border-red-500/20 bg-red-500/10 text-red-100"
-              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-          }`}
-        >
-          {error ?? success}
-        </div>
-      )}
+      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
+      {error ? <ErrorNotice>{error}</ErrorNotice> : null}
+      {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
         <div className="flex flex-wrap items-start justify-between gap-4">

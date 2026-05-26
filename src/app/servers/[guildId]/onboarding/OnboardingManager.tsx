@@ -6,6 +6,11 @@ import {
   DiscordChannelSelect,
   useDiscordChannels,
 } from "@/components/DiscordResourceSelects";
+import {
+  ErrorNotice,
+  InfoNotice,
+  SuccessNotice,
+} from "@/components/ServerReadOnlySection";
 
 export type OnboardingSettings = {
   onboardingEnabled: boolean;
@@ -319,11 +324,12 @@ export default function OnboardingManager({
     Record<number, OptionDraft>
   >({});
   const [busyAction, setBusyAction] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(
+  const [loadNotice] = useState<string | null>(
     loadError
-      ? "Onboarding could not be loaded. Safe defaults are shown."
+      ? "Safe onboarding defaults are shown until saved settings are available."
       : null
   );
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const channelsState = useDiscordChannels(guildId);
   const isBusy = busyAction !== null;
@@ -656,17 +662,9 @@ export default function OnboardingManager({
 
   return (
     <div className="space-y-6">
-      {(error || success) && (
-        <div
-          className={`rounded-2xl border p-4 text-sm ${
-            error
-              ? "border-red-500/20 bg-red-500/10 text-red-100"
-              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-          }`}
-        >
-          {error ?? success}
-        </div>
-      )}
+      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
+      {error ? <ErrorNotice>{error}</ErrorNotice> : null}
+      {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-300">

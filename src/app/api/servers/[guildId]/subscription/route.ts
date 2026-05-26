@@ -33,6 +33,7 @@ export async function GET(
             trialEndsAt: formatDate(subscription.trial_ends_at),
             currentPeriodEnd: formatDate(subscription.current_period_end),
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            billingActive: Boolean(subscription.stripe_subscription_id),
           }
         : {
             plan: "Free / Not set",
@@ -41,6 +42,7 @@ export async function GET(
             trialEndsAt: null,
             currentPeriodEnd: null,
             cancelAtPeriodEnd: false,
+            billingActive: false,
           },
     });
   } catch (error) {

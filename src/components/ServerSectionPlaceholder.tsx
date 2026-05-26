@@ -19,7 +19,7 @@ export default async function ServerSectionPlaceholder({
         href={`/servers/${guildId}`}
         className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-300 hover:text-blue-200"
       >
-        ← Back to Dashboard
+        Back to Dashboard
       </Link>
 
       <h1 className="mt-8 text-5xl font-bold md:text-6xl">{title}</h1>
@@ -28,11 +28,12 @@ export default async function ServerSectionPlaceholder({
         {description}
       </p>
 
-      <div className="mt-8 rounded-2xl border border-white/10 bg-black/40 p-5 text-sm text-slate-400">
-        Server ID: <span className="text-slate-200">{guildId}</span>
+      <div className="mt-6 inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-xs text-slate-500">
+        <span>Server ID</span>
+        <span className="truncate font-mono text-slate-400">{guildId}</span>
       </div>
 
-      <div className="mt-12">
+      <div className="mt-8">
         {children ?? (
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
             <p className="text-slate-300">

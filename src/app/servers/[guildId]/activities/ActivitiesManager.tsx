@@ -6,6 +6,11 @@ import {
   type DiscordChannel,
   useDiscordChannels,
 } from "@/components/DiscordResourceSelects";
+import {
+  ErrorNotice,
+  InfoNotice,
+  SuccessNotice,
+} from "@/components/ServerReadOnlySection";
 
 export type ActivitySetting = {
   activityKey: string;
@@ -149,9 +154,10 @@ export default function ActivitiesManager({
     )
   );
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(
-    loadError ? "Activities could not be loaded." : null
+  const [loadNotice] = useState<string | null>(
+    loadError ? "Activity defaults are shown until saved settings are available." : null
   );
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const selectedActivity =
@@ -271,17 +277,9 @@ export default function ActivitiesManager({
 
   return (
     <section className="space-y-5">
-      {(error || success) && (
-        <div
-          className={`rounded-2xl border p-4 text-sm ${
-            error
-              ? "border-red-500/20 bg-red-500/10 text-red-100"
-              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-          }`}
-        >
-          {error ?? success}
-        </div>
-      )}
+      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
+      {error ? <ErrorNotice>{error}</ErrorNotice> : null}
+      {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>

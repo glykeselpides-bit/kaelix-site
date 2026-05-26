@@ -5,6 +5,11 @@ import {
   DiscordChannelSelect,
   useDiscordChannels,
 } from "@/components/DiscordResourceSelects";
+import {
+  ErrorNotice,
+  InfoNotice,
+  SuccessNotice,
+} from "@/components/ServerReadOnlySection";
 
 export type EditableServerSettings = {
   weekly_digest_enabled: boolean;
@@ -159,9 +164,10 @@ export default function SettingsForm({
   const [settings, setSettings] =
     useState<EditableServerSettings>(safeInitialSettings);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(
-    loadError ? "Settings could not be loaded. Safe defaults are shown." : null
+  const [loadNotice] = useState<string | null>(
+    loadError ? "Safe settings defaults are shown until saved settings are available." : null
   );
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const channelsState = useDiscordChannels(guildId);
 
@@ -214,17 +220,9 @@ export default function SettingsForm({
 
   return (
     <div className="space-y-6">
-      {(error || success) && (
-        <div
-          className={`rounded-2xl border p-4 text-sm ${
-            error
-              ? "border-red-500/20 bg-red-500/10 text-red-100"
-              : "border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
-          }`}
-        >
-          {error ?? success}
-        </div>
-      )}
+      {loadNotice ? <InfoNotice>{loadNotice}</InfoNotice> : null}
+      {error ? <ErrorNotice>{error}</ErrorNotice> : null}
+      {success ? <SuccessNotice>{success}</SuccessNotice> : null}
 
       <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">

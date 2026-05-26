@@ -113,6 +113,30 @@ export function LoadError({ label }: { label: string }) {
   );
 }
 
+export function InfoNotice({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-100">
+      {children}
+    </div>
+  );
+}
+
+export function SuccessNotice({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-6 text-emerald-100">
+      {children}
+    </div>
+  );
+}
+
+export function ErrorNotice({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm leading-6 text-red-100">
+      {children}
+    </div>
+  );
+}
+
 export function EmptyValue() {
   return <span className="text-slate-500">Not set</span>;
 }
