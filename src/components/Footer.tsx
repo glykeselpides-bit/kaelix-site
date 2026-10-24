@@ -1,7 +1,8 @@
+
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-black/60">
-      <div className="flex w-full items-center justify-between px-12 py-4">
+      <div className="flex w-full items-center justify-between gap-4 px-6 py-4 md:px-12">
         <div className="flex items-center gap-3">
           <img
             src="/kx_Logo.png"
@@ -14,12 +15,28 @@ export default function Footer() {
           </span>
         </div>
 
-        <a
-          href="mailto:hello@joinkaelix.com"
-          className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-blue-400/50 hover:bg-blue-500/10 hover:text-white"
-        >
-          Contact
-        </a>
+        <div className="flex flex-wrap items-center justify-end gap-4">
+          <a
+            href="/privacy"
+            className="text-sm text-slate-400 transition hover:text-white"
+          >
+            Privacy Policy
+          </a>
+
+          <a
+            href="/terms"
+            className="text-sm text-slate-400 transition hover:text-white"
+          >
+            Terms of Service
+          </a>
+
+          <a
+            href="mailto:hello@joinkaelix.com"
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-blue-400/50 hover:bg-blue-500/10 hover:text-white"
+          >
+            Contact
+          </a>
+        </div>
       </div>
     </footer>
   );
