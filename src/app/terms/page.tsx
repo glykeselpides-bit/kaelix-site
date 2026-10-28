@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Service | Kaelix",
@@ -156,12 +157,12 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen bg-[#080b14] px-6 py-16 text-slate-200">
       <article className="mx-auto max-w-4xl">
-        <a
+        <Link
           href="/"
           className="mb-10 inline-block text-sm text-violet-400 hover:text-violet-300"
         >
           ← Back to Kaelix
-        </a>
+        </Link>
 
         <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-violet-400">
           Legal

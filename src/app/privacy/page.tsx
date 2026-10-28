@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Kaelix",
@@ -18,6 +19,7 @@ const sections = [
       "User-provided information: optional age, birthday, personality preferences, biography, onboarding responses, captions, and other submissions.",
       "Website and administration information: Discord OAuth account information, server configurations, dashboard activity, and administrative action records.",
       "Technical information: error records, operational logs, and security-related events.",
+      "Subscription information: for servers on a paid plan or free trial, the plan, its status, and its start, renewal and end dates. For purchases made through Discord, this includes the purchase record Discord sends us (purchase ID, server ID, the Discord user ID of the purchaser, and the plan purchased).",
     ],
     closing:
       "Certain interactive features may process message content or user submissions. Where necessary for a feature, submitted content may also be stored.",
@@ -51,6 +53,7 @@ const sections = [
       "Kaelix uses third-party infrastructure and service providers, including Discord, Railway, Vercel, and associated database or hosting services.",
       "These providers may process information as necessary to support the operation of Kaelix.",
       "Information may be processed or stored outside the United Kingdom or European Economic Area. Where legally required, appropriate safeguards must apply to international transfers.",
+      "Purchases made through Discord are processed by Discord. We do not receive or store card numbers or other payment details.",
       "We do not sell personal information.",
     ],
   },
@@ -125,12 +128,12 @@ export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-[#080b14] px-6 py-16 text-slate-200">
       <article className="mx-auto max-w-4xl">
-        <a
+        <Link
           href="/"
           className="mb-10 inline-block text-sm text-violet-400 hover:text-violet-300"
         >
           ← Back to Kaelix
-        </a>
+        </Link>
 
         <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-violet-400">
           Legal
@@ -141,7 +144,7 @@ export default function PrivacyPage() {
         </h1>
 
         <p className="mt-4 text-sm text-slate-400">
-          Last updated: 24 October 2026
+          Last updated: 28 October 2026
         </p>
 
         <div className="mt-10 rounded-xl border border-violet-500/30 bg-violet-500/10 p-6">
