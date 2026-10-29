@@ -8,6 +8,7 @@ import {
 import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
+import { guardGuild } from "@/lib/guildAccess";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -281,6 +282,9 @@ export async function GET(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  const denied = await guardGuild(guildId);
+  if (denied) return denied;
   const guildIdBigInt = parseGuildId(guildId);
 
   if (!guildIdBigInt) {
@@ -326,6 +330,9 @@ export async function POST(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  const denied = await guardGuild(guildId);
+  if (denied) return denied;
   const guildIdBigInt = parseGuildId(guildId);
 
   if (!guildIdBigInt) {
@@ -398,6 +405,9 @@ export async function PATCH(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  const denied = await guardGuild(guildId);
+  if (denied) return denied;
   const guildIdBigInt = parseGuildId(guildId);
 
   if (!guildIdBigInt) {
@@ -502,6 +512,9 @@ export async function DELETE(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  const denied = await guardGuild(guildId);
+  if (denied) return denied;
   const guildIdBigInt = parseGuildId(guildId);
 
   if (!guildIdBigInt) {

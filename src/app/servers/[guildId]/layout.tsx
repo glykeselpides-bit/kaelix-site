@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import GuildAccessNotice from "@/components/GuildAccessNotice";
+import { checkGuildAccess } from "@/lib/guildAccess";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -24,6 +26,24 @@ export default async function ServerLayout({
   params: Promise<{ guildId: string }>;
 }) {
   const { guildId } = await params;
+
+  // The API routes refuse anyone who can't manage this server, so no data
+  // leaks either way; this just explains why instead of showing empty pages.
+  const access = await checkGuildAccess(guildId);
+
+  if (!access.ok) {
+    return (
+      <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">
+        <div className="min-h-screen bg-black/75">
+          <Navbar />
+
+          <div className="mx-auto max-w-3xl px-6 pb-24 pt-32">
+            <GuildAccessNotice reason={access.reason} />
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-black bg-[url('/banner2.png')] bg-cover bg-center text-white">

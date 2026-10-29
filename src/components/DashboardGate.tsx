@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import GuildAccessNotice, {
+  type AccessProblem,
+} from "@/components/GuildAccessNotice";
+import { BOT_INVITE_URL } from "@/lib/discordStore";
 
 type DiscordGuild = {
   id: string;
@@ -25,37 +29,99 @@ function canManageServer(permissions: string, owner: boolean) {
   );
 }
 
+const KNOWN_PROBLEMS: AccessProblem[] = [
+  "not_logged_in",
+  "login_expired",
+  "discord_unavailable",
+  "bot_list_unavailable",
+];
+
+/** The "reason" an API error carries, or the given fallback. */
+async function problemFrom(
+  response: Response,
+  fallback: AccessProblem
+): Promise<AccessProblem> {
+  try {
+    const body = await response.json();
+    return KNOWN_PROBLEMS.includes(body?.reason) ? body.reason : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function inviteUrlFor(guildId: string) {
+  return `${BOT_INVITE_URL}&guild_id=${guildId}&disable_guild_select=true`;
+}
+
+type GuildData = {
+  guilds: DiscordGuild[];
+  botGuildIds: string[];
+  problem: AccessProblem | null;
+};
+
+async function loadGuildData(): Promise<GuildData> {
+  const empty = { guilds: [], botGuildIds: [] };
+
+  try {
+    const userResponse = await fetch("/api/discord/guilds");
+
+    if (!userResponse.ok) {
+      return { ...empty, problem: await problemFrom(userResponse, "discord_unavailable") };
+    }
+
+    const userData = await userResponse.json();
+    const guilds = Array.isArray(userData) ? userData : [];
+
+    const botResponse = await fetch("/api/discord/bot-guilds");
+
+    if (!botResponse.ok) {
+      return { guilds, botGuildIds: [], problem: await problemFrom(botResponse, "bot_list_unavailable") };
+    }
+
+    const botData = await botResponse.json();
+    return { guilds, botGuildIds: Array.isArray(botData) ? botData : [], problem: null };
+  } catch {
+    return { ...empty, problem: "discord_unavailable" };
+  }
+}
+
 export default function DashboardGate() {
   const { data: session, status } = useSession();
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [botGuildIds, setBotGuildIds] = useState<string[]>([]);
-  const [loadingGuilds, setLoadingGuilds] = useState(false);
+  const [loadingGuilds, setLoadingGuilds] = useState(true);
+  const [problem, setProblem] = useState<AccessProblem | null>(null);
+
+  const apply = useCallback((data: GuildData) => {
+    setGuilds(data.guilds);
+    setBotGuildIds(data.botGuildIds);
+    setProblem(data.problem);
+    setLoadingGuilds(false);
+  }, []);
 
   useEffect(() => {
-    if (!session) return;
-
-    async function loadGuilds() {
-      setLoadingGuilds(true);
-
-      const userResponse = await fetch("/api/discord/guilds");
-      const userData = await userResponse.json();
-
-      const botResponse = await fetch("/api/discord/bot-guilds");
-      const botData = await botResponse.json();
-
-      if (Array.isArray(userData)) {
-        setGuilds(userData);
-      }
-
-      if (Array.isArray(botData)) {
-        setBotGuildIds(botData);
-      }
-
-      setLoadingGuilds(false);
+    if (status !== "authenticated") {
+      return;
     }
 
-    loadGuilds();
-  }, [session]);
+    let cancelled = false;
+
+    loadGuildData().then((data) => {
+      if (!cancelled) {
+        apply(data);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, apply]);
+
+  const loadGuilds = useCallback(async () => {
+    setLoadingGuilds(true);
+    setProblem(null);
+    apply(await loadGuildData());
+  }, [apply]);
 
   if (status === "loading") {
     return <p className="mt-8 text-slate-400">Checking login...</p>;
@@ -98,13 +164,34 @@ export default function DashboardGate() {
         <p className="mt-8 text-slate-400">Loading your servers...</p>
       )}
 
-      {!loadingGuilds && manageableGuilds.length === 0 && (
-        <p className="mt-8 text-slate-400">
-          No manageable Discord servers found for this account.
-        </p>
+      {!loadingGuilds && problem && (
+        <div className="mt-8">
+          <GuildAccessNotice
+            reason={problem}
+            onRetry={loadGuilds}
+            showServersLink={false}
+          />
+        </div>
       )}
 
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
+      {!loadingGuilds && !problem && manageableGuilds.length === 0 && (
+        <div className="mt-8 text-slate-400">
+          <p>
+            None of your Discord servers let you manage them. You need to own
+            the server, or have Manage Server or Administrator in it.
+          </p>
+
+          <button
+            type="button"
+            onClick={loadGuilds}
+            className="mt-4 text-sm font-semibold text-blue-300 underline-offset-4 hover:underline"
+          >
+            Check again
+          </button>
+        </div>
+      )}
+
+      <div className={`mt-8 grid gap-5 md:grid-cols-2 ${problem ? "hidden" : ""}`}>
         {manageableGuilds.map((guild) => {
           const isConnected = botGuildIds.includes(guild.id);
 
@@ -138,7 +225,7 @@ export default function DashboardGate() {
                 </Link>
               ) : (
                 <a
-                  href="https://discord.gg/2PYbjwmHRX"
+                  href={inviteUrlFor(guild.id)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-8 inline-flex rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-blue-400 hover:bg-blue-500/10"

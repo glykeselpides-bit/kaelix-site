@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { formatDate, invalidGuildIdResponse, parseGuildId } from "@/lib/dashboardApi";
 import { getPrisma } from "@/lib/prisma";
 import { getServerPlan } from "@/lib/serverPlan";
+import { guardGuild } from "@/lib/guildAccess";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -12,6 +13,9 @@ export async function GET(
   { params }: { params: Promise<{ guildId: string }> }
 ) {
   const { guildId } = await params;
+
+  const denied = await guardGuild(guildId);
+  if (denied) return denied;
   const guildIdBigInt = parseGuildId(guildId);
 
   if (!guildIdBigInt) {

@@ -18,7 +18,12 @@ export async function fetchServerSection<T>(guildId: string, section: string) {
     const baseUrl = `${protocol}://${host}`;
     const response = await fetch(
       `${baseUrl}/api/servers/${encodeURIComponent(guildId)}/${section}`,
-      { cache: "no-store" }
+      {
+        cache: "no-store",
+        // Pass the visitor's login along: the API checks they can manage
+        // this server (see lib/guildAccess.ts).
+        headers: { cookie: requestHeaders.get("cookie") ?? "" },
+      }
     );
 
     if (!response.ok) {
