@@ -34,7 +34,7 @@ const plans = [
     ],
     activities:
       "Quiz, Cipher, Hidden Word, Story Chain, Caption This",
-    button: "Get Core on Discord",
+    button: "Choose Core",
     highlight: false,
   },
   {
@@ -51,7 +51,7 @@ const plans = [
       "Expanded faction systems",
     ],
     activities: "All Activities Included",
-    button: "Get Pro on Discord",
+    button: "Choose Pro",
     highlight: true,
   },
   {
@@ -136,7 +136,7 @@ export default function PricingPage() {
                   </ul>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="mb-8 mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-300">
                     Activities
                   </p>
