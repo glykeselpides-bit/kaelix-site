@@ -1,166 +1,210 @@
-"use client";
-
-import { Suspense, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import {
+  BOT_INVITE_URL,
+  DISCORD_STORE_URL,
+  planStoreUrl,
+  toBuyablePlan,
+} from "@/lib/discordStore";
+
+/**
+ * Where every "Choose plan" / "Upgrade" button lands. Kaelix is sold through
+ * Discord only, so this page sends people to the Discord store and explains
+ * the in-server way to buy. No payment happens on this site.
+ */
 
 const plans = [
-  { id: "core", name: "Core", price: 4.99 },
-  { id: "pro", name: "Pro", price: 18.99 },
+  {
+    id: "core" as const,
+    name: "Core",
+    price: "£5.99/mo",
+    summary: "For active, growing communities.",
+  },
+  {
+    id: "pro" as const,
+    name: "Pro",
+    price: "£20.99/mo",
+    summary: "For larger, highly active communities.",
+  },
 ];
 
-const addOns = [
-  { id: "setup", name: "Premium Setup", price: 29.99 },
-  { id: "analytics", name: "Advanced Analytics", price: 9.99 },
-  { id: "automation", name: "Custom Automation", price: 14.99 },
-  { id: "visuals", name: "Custom Visuals", price: 19.99 },
+const steps = [
+  {
+    title: "Add Kaelix to your server",
+    body: "Skip this if Kaelix is already in your server.",
+  },
+  {
+    title: "Run /settings",
+    body: "In any channel of your server, as a server admin.",
+  },
+  {
+    title: "Open Plan & Access",
+    body: "It shows your server's current plan and the plans you can buy.",
+  },
+  {
+    title: "Pick a plan and pay in Discord",
+    body: "Discord handles the payment. Your server's plan unlocks automatically once it goes through.",
+  },
 ];
 
-function CheckoutContent() {
-  const searchParams = useSearchParams();
-  const startingPlan = searchParams.get("plan")?.toLowerCase() || "";
+export default async function CheckoutPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ plan?: string; guildId?: string }>;
+}) {
+  const { plan, guildId } = await searchParams;
+  const selected = toBuyablePlan(plan);
 
-  const [selectedPlan, setSelectedPlan] = useState(startingPlan);
-  const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
-
-  const selectedPlanData = plans.find((plan) => plan.id === selectedPlan);
-
-  const selectedAddOnData = addOns.filter((addOn) =>
-    selectedAddOns.includes(addOn.id)
-  );
-
-  const total = useMemo(() => {
-    const planTotal = selectedPlanData?.price || 0;
-    const addOnsTotal = selectedAddOnData.reduce(
-      (sum, addOn) => sum + addOn.price,
-      0
-    );
-
-    return planTotal + addOnsTotal;
-  }, [selectedPlanData, selectedAddOnData]);
-
-  function toggleAddOn(id: string) {
-    setSelectedAddOns((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id]
-    );
-  }
-
-  return (
-    <main className="min-h-screen bg-black px-6 py-24 text-white">
-      <div className="mx-auto max-w-6xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-300">
-          Checkout
-        </p>
-
-        <h1 className="mt-5 text-5xl font-black">Build your basket.</h1>
-
-        <p className="mt-5 max-w-2xl text-slate-400">
-          Choose one plan, add as many add-ons as you want, or purchase add-ons
-          only.
-        </p>
-
-        <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_360px]">
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-2xl font-bold">Choose one plan</h2>
-
-              <div className="mt-5 grid gap-4 md:grid-cols-3">
-                {plans.map((plan) => (
-                  <button
-                    key={plan.id}
-                    onClick={() =>
-                      setSelectedPlan(selectedPlan === plan.id ? "" : plan.id)
-                    }
-                    className={`rounded-3xl border p-6 text-left transition ${
-                      selectedPlan === plan.id
-                        ? "border-blue-400 bg-blue-500/10"
-                        : "border-white/10 bg-white/[0.03] hover:border-blue-400/40"
-                    }`}
-                  >
-                    <div className="text-xl font-bold">{plan.name}</div>
-                    <div className="mt-3 text-2xl font-black text-blue-300">
-                      £{plan.price}/mo
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold">Add-ons</h2>
-
-              <div className="mt-5 grid gap-4 md:grid-cols-2">
-                {addOns.map((addOn) => (
-                  <button
-                    key={addOn.id}
-                    onClick={() => toggleAddOn(addOn.id)}
-                    className={`rounded-3xl border p-6 text-left transition ${
-                      selectedAddOns.includes(addOn.id)
-                        ? "border-blue-400 bg-blue-500/10"
-                        : "border-white/10 bg-white/[0.03] hover:border-blue-400/40"
-                    }`}
-                  >
-                    <div className="text-lg font-bold">{addOn.name}</div>
-                    <div className="mt-3 text-xl font-black text-blue-300">
-                      £{addOn.price}/mo
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </div>
-
-          <aside className="rounded-[32px] border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
-            <h2 className="text-2xl font-bold">Basket</h2>
-
-            <div className="mt-6 space-y-4 text-sm text-slate-300">
-              {selectedPlanData && (
-                <div className="flex justify-between gap-4">
-                  <span>{selectedPlanData.name}</span>
-                  <span>£{selectedPlanData.price}/mo</span>
-                </div>
-              )}
-
-              {selectedAddOnData.map((addOn) => (
-                <div key={addOn.id} className="flex justify-between gap-4">
-                  <span>{addOn.name}</span>
-                  <span>£{addOn.price}/mo</span>
-                </div>
-              ))}
-
-              {!selectedPlanData && selectedAddOnData.length === 0 && (
-                <p className="text-slate-500">Nothing selected yet.</p>
-              )}
-            </div>
-
-            <div className="mt-8 border-t border-white/10 pt-6">
-              <div className="flex justify-between text-xl font-bold">
-                <span>Total</span>
-                <span>£{total.toFixed(2)}/mo</span>
-              </div>
-            </div>
-
-            <button className="mt-8 w-full rounded-2xl bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition hover:bg-blue-500">
-              Continue to Payment
-            </button>
-          </aside>
-        </div>
-      </div>
-    </main>
-  );
-}
-
-export default function CheckoutPage() {
   return (
     <>
       <Navbar />
 
-      <Suspense fallback={null}>
-        <CheckoutContent />
-      </Suspense>
+      <main className="min-h-screen bg-black px-6 py-24 text-white">
+        <div className="mx-auto max-w-5xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-300">
+            Upgrade
+          </p>
+
+          <h1 className="mt-5 text-4xl font-black md:text-5xl">
+            Kaelix plans are bought through Discord.
+          </h1>
+
+          <p className="mt-5 max-w-2xl leading-7 text-slate-400">
+            Payment, receipts and monthly renewals are all handled by Discord,
+            and the plan is attached to the server you choose at checkout. Your
+            server&apos;s plan unlocks automatically once the payment goes
+            through.
+          </p>
+
+          <section className="mt-12">
+            <h2 className="text-2xl font-bold">Buy on the Discord store</h2>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {plans.map((p) => {
+                const highlighted = selected === p.id;
+
+                return (
+                  <div
+                    key={p.id}
+                    className={`flex flex-col rounded-3xl border p-6 ${
+                      highlighted
+                        ? "border-blue-400 bg-blue-500/10"
+                        : "border-white/10 bg-white/[0.03]"
+                    }`}
+                  >
+                    <div className="flex items-baseline justify-between gap-4">
+                      <div className="text-xl font-bold">{p.name}</div>
+                      <div className="text-xl font-black text-blue-300">
+                        {p.price}
+                      </div>
+                    </div>
+
+                    <p className="mt-2 text-sm text-slate-400">{p.summary}</p>
+
+                    <a
+                      href={planStoreUrl(p.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`mt-6 rounded-2xl px-6 py-3 text-center text-sm font-semibold transition ${
+                        highlighted
+                          ? "bg-blue-600 text-white hover:bg-blue-500"
+                          : "border border-white/15 bg-white/5 text-white hover:border-blue-400 hover:bg-blue-500/10"
+                      }`}
+                    >
+                      Buy {p.name} on Discord
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="mt-4 text-sm text-slate-500">
+              {guildId
+                ? "When Discord asks which server the plan is for, pick the server you came from. "
+                : "Discord will ask which server the plan is for. "}
+              The final price is shown at Discord checkout, in your local
+              currency. You can also{" "}
+              <a
+                href={DISCORD_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-300 underline-offset-4 hover:underline"
+              >
+                browse the whole Kaelix store
+              </a>
+              .
+            </p>
+          </section>
+
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold">Or buy from inside your server</h2>
+
+            <ol className="mt-6 grid gap-4 md:grid-cols-2">
+              {steps.map((step, i) => (
+                <li
+                  key={step.title}
+                  className="flex gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-400/40 bg-blue-500/10 text-sm font-bold text-blue-200">
+                    {i + 1}
+                  </span>
+
+                  <div>
+                    <div className="font-bold">{step.title}</div>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                      {step.body}
+                    </p>
+
+                    {i === 0 && (
+                      <a
+                        href={BOT_INVITE_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-block text-sm font-semibold text-blue-300 underline-offset-4 hover:underline"
+                      >
+                        Add Kaelix to Discord
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section className="mt-16 grid gap-4 md:grid-cols-2">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <h2 className="text-lg font-bold">Changing or cancelling</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Subscriptions are managed in Discord, under User Settings →
+                Subscriptions. If you cancel, your server keeps the plan until
+                the end of the period you&apos;ve paid for.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+              <h2 className="text-lg font-bold">Need Elite?</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Elite is set up for each community individually.{" "}
+                <a
+                  href="mailto:hello@joinkaelix.com"
+                  className="text-blue-300 underline-offset-4 hover:underline"
+                >
+                  Contact us
+                </a>{" "}
+                or see the full comparison on the{" "}
+                <Link
+                  href="/pricing"
+                  className="text-blue-300 underline-offset-4 hover:underline"
+                >
+                  pricing page
+                </Link>
+                .
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
 
       <Footer />
     </>

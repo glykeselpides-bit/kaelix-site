@@ -22,7 +22,7 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     id: "core",
     name: "Core",
-    price: "GBP 4.99/mo",
+    price: "GBP 5.99/mo",
     summary: "Useful defaults for active communities.",
     features: [
       "Activity configuration",
@@ -33,7 +33,7 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     id: "pro",
     name: "Pro",
-    price: "GBP 18.99/mo",
+    price: "GBP 20.99/mo",
     summary: "More room for advanced community operations.",
     features: [
       "Expanded analytics",
@@ -72,7 +72,7 @@ function getButtonLabel(currentPlanId: string, planId: string) {
 
   return nextIndex > currentIndex
     ? `Upgrade to ${planId.charAt(0).toUpperCase() + planId.slice(1)}`
-    : "Select plan";
+    : "Change or cancel";
 }
 
 export default function SubscriptionPlanOptions({
@@ -98,6 +98,10 @@ export default function SubscriptionPlanOptions({
           <h2 className="mt-3 text-2xl font-bold text-white">
             Choose a Kaelix tier
           </h2>
+
+          <p className="mt-2 text-sm text-slate-400">
+            Plans are bought and managed through Discord.
+          </p>
         </div>
 
         <Link
@@ -152,7 +156,12 @@ export default function SubscriptionPlanOptions({
                 </button>
               ) : (
                 <Link
-                  href={`/checkout?guildId=${guildId}&plan=${plan.id}`}
+                  href={
+                    PLAN_OPTIONS.findIndex((p) => p.id === plan.id) >
+                    PLAN_OPTIONS.findIndex((p) => p.id === currentPlanId)
+                      ? `/checkout?guildId=${guildId}&plan=${plan.id}`
+                      : `/checkout?guildId=${guildId}`
+                  }
                   className="mt-6 inline-flex items-center justify-center rounded-2xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-400"
                 >
                   {getButtonLabel(currentPlanId, plan.id)}

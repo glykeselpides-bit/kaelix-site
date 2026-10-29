@@ -1,5 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
+import { BOT_INVITE_URL, planStoreUrl } from "@/lib/discordStore";
 
 const plans = [
   {
@@ -19,7 +21,7 @@ const plans = [
   },
   {
     name: "Core",
-    price: "£4.99/mo",
+    price: "£5.99/mo",
     description: "Built for active growing communities that need structure and engagement.",
     features: [
       "Up to 200 server members",
@@ -32,12 +34,12 @@ const plans = [
     ],
     activities:
       "Quiz, Cipher, Hidden Word, Story Chain, Caption This",
-    button: "Choose Core",
+    button: "Get Core on Discord",
     highlight: false,
   },
   {
     name: "Pro",
-    price: "£18.99/mo",
+    price: "£20.99/mo",
     description: "Advanced systems for larger and highly active communities.",
     features: [
       "Up to 1,000 server members",
@@ -49,7 +51,7 @@ const plans = [
       "Expanded faction systems",
     ],
     activities: "All Activities Included",
-    button: "Choose Pro",
+    button: "Get Pro on Discord",
     highlight: true,
   },
   {
@@ -149,9 +151,12 @@ export default function PricingPage() {
                     plan.name === "Elite"
                       ? "mailto:hello@joinkaelix.com"
                       : plan.name === "Free"
-                        ? "https://discord.gg/2PYbjwmHRX"
-                        : `/checkout?plan=${plan.name.toLowerCase()}`
+                        ? BOT_INVITE_URL
+                        : planStoreUrl(plan.name === "Pro" ? "pro" : "core")
                   }
+                  {...(plan.name === "Elite"
+                    ? {}
+                    : { target: "_blank", rel: "noopener noreferrer" })}
                   className={`mt-auto rounded-2xl px-6 py-4 text-center text-sm font-semibold transition ${
                     plan.highlight
                       ? "bg-blue-600 text-white hover:bg-blue-500"
@@ -163,6 +168,20 @@ export default function PricingPage() {
               </div>
             ))}
           </div>
+
+          <p className="mx-auto mt-12 max-w-3xl text-center text-sm leading-7 text-slate-400">
+            Plans are bought and managed through Discord. You can also buy
+            from inside your server: add Kaelix, run{" "}
+            <span className="font-semibold text-slate-200">/settings</span>,
+            then open{" "}
+            <span className="font-semibold text-slate-200">Plan &amp; Access</span>.{" "}
+            <Link
+              href="/checkout"
+              className="text-blue-300 underline-offset-4 hover:underline"
+            >
+              How buying works
+            </Link>
+          </p>
         </section>
       </div>
       <Footer />
