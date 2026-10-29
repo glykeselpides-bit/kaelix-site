@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { getServerPlan } from "@/lib/serverPlan";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,14 +22,12 @@ export async function GET(
     const prisma = getPrisma();
     const guildIdBigInt = BigInt(guildId);
 
-    const [config, subscription, eventsCount, factionsCount, usersCount, totalPoints] =
+    const [config, plan, eventsCount, factionsCount, usersCount, totalPoints] =
       await Promise.all([
         prisma.guild_config.findUnique({
           where: { guild_id: guildIdBigInt },
         }),
-        prisma.guild_subscriptions.findUnique({
-          where: { guild_id: guildIdBigInt },
-        }),
+        getServerPlan(prisma, guildIdBigInt),
         prisma.events.count({
           where: { guild_id: guildIdBigInt },
         }),
@@ -45,8 +44,8 @@ export async function GET(
       ]);
 
     return NextResponse.json({
-      plan: subscription?.plan ?? "Free / Not set",
-      status: subscription?.status ?? "Active / Not set",
+      plan: plan.planLabel,
+      status: plan.status,
       eventsCount,
       factionsCount,
       usersCount,

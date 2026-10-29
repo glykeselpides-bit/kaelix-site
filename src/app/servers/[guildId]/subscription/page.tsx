@@ -17,8 +17,10 @@ type SubscriptionData = {
     trialUsed: boolean;
     trialEndsAt: string | null;
     currentPeriodEnd: string | null;
+    accessEndsAt?: string | null;
     cancelAtPeriodEnd: boolean;
     billingActive?: boolean;
+    billedThrough?: string | null;
   };
 };
 
@@ -47,6 +49,10 @@ export default async function SubscriptionPage({
               { label: "Current plan", value: subscription.plan },
               { label: "Plan status", value: subscription.status },
               {
+                label: "Billed through",
+                value: subscription.billedThrough ?? "Not billed",
+              },
+              {
                 label: "Trial used",
                 value: subscription.trialUsed ? "Yes" : "No",
               },
@@ -61,6 +67,10 @@ export default async function SubscriptionPage({
               {
                 label: "Cancels at period end",
                 value: subscription.cancelAtPeriodEnd ? "Yes" : "No",
+              },
+              {
+                label: "Access until",
+                value: formatDashboardDate(subscription.accessEndsAt ?? null),
               },
             ]}
           />

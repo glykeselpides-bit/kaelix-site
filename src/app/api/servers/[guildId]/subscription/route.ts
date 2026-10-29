@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { formatDate, invalidGuildIdResponse, parseGuildId } from "@/lib/dashboardApi";
 import { getPrisma } from "@/lib/prisma";
+import { getServerPlan } from "@/lib/serverPlan";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -19,31 +20,23 @@ export async function GET(
 
   try {
     const prisma = getPrisma();
-    const subscription = await prisma.guild_subscriptions.findUnique({
-      where: { guild_id: guildIdBigInt },
-    });
+    const plan = await getServerPlan(prisma, guildIdBigInt);
 
     return NextResponse.json({
-      found: Boolean(subscription),
-      subscription: subscription
-        ? {
-            plan: subscription.plan,
-            status: subscription.status,
-            trialUsed: subscription.trial_used,
-            trialEndsAt: formatDate(subscription.trial_ends_at),
-            currentPeriodEnd: formatDate(subscription.current_period_end),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            billingActive: Boolean(subscription.stripe_subscription_id),
-          }
-        : {
-            plan: "Free / Not set",
-            status: "Not set",
-            trialUsed: false,
-            trialEndsAt: null,
-            currentPeriodEnd: null,
-            cancelAtPeriodEnd: false,
-            billingActive: false,
-          },
+      found: true,
+      subscription: {
+        plan: plan.planLabel,
+        planId: plan.plan,
+        source: plan.source,
+        status: plan.status,
+        billedThrough: plan.billedThrough,
+        trialUsed: plan.trialUsed,
+        trialEndsAt: formatDate(plan.trialEndsAt),
+        currentPeriodEnd: formatDate(plan.currentPeriodEnd),
+        accessEndsAt: formatDate(plan.accessEndsAt),
+        cancelAtPeriodEnd: plan.cancelAtPeriodEnd,
+        billingActive: plan.source === "discord" || plan.source === "subscription",
+      },
     });
   } catch (error) {
     console.error("Failed to load server subscription", error);
