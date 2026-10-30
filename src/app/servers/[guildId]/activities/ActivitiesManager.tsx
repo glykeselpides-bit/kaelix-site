@@ -309,28 +309,35 @@ export default function ActivitiesManager({
                   key={activity.activityKey}
                   type="button"
                   onClick={() => setSelectedKey(activity.activityKey)}
-                  className={`rounded-2xl border p-4 text-left transition ${
+                  className={`flex flex-col items-start justify-start rounded-2xl border p-4 text-left transition ${
                     isSelected
                       ? "border-blue-300/60 bg-blue-400/10"
                       : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-bold text-white">{activity.label}</span>
+                  <p className="font-bold leading-snug text-white">
+                    {activity.label}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {activity.includedInPlan === false ? (
-                      <span className="rounded-full bg-amber-300/10 px-2 py-1 text-[11px] font-bold text-amber-100">
-                        Needs {activity.requiredPlan}
+                      // Locked by plan: on/off doesn't matter until they upgrade.
+                      <span
+                        title={`Needs the ${activity.requiredPlan} plan`}
+                        className="whitespace-nowrap rounded-full bg-amber-300/10 px-2 py-0.5 text-[11px] font-bold text-amber-100"
+                      >
+                        {"\u{1F512}"} {activity.requiredPlan}
                       </span>
-                    ) : null}
-                    <span
-                      className={`rounded-full px-2 py-1 text-[11px] font-bold ${
-                        draft.enabled
-                          ? "bg-emerald-400/10 text-emerald-100"
-                          : "bg-slate-500/20 text-slate-300"
-                      }`}
-                    >
-                      {draft.enabled ? "On" : "Off"}
-                    </span>
+                    ) : (
+                      <span
+                        className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                          draft.enabled
+                            ? "bg-emerald-400/10 text-emerald-100"
+                            : "bg-slate-500/20 text-slate-300"
+                        }`}
+                      >
+                        {draft.enabled ? "On" : "Off"}
+                      </span>
+                    )}
                   </div>
                   <div className="mt-3 space-y-1 text-xs text-slate-400">
                     <p>
