@@ -67,8 +67,8 @@ type ActivityPatch = {
 const ACTIVITY_CATALOG: ActivityCatalogItem[] = [
   { key: "riddle", label: "Riddle", sessionModel: "riddle_sessions" },
   { key: "would_you_rather", label: "Would You Rather", sessionModel: "wyr_sessions", endedField: "ends_at" },
-  { key: "true_false", label: "True or False" },
-  { key: "quiz", label: "Quiz" },
+  { key: "true_false", label: "True or False", sessionModel: "true_false_sessions" },
+  { key: "quiz", label: "Quiz", sessionModel: "activity_sessions" },
   { key: "cipher", label: "Cipher", sessionModel: "cipher_sessions" },
   { key: "hidden_word", label: "Hidden Word", sessionModel: "hidden_word_sessions" },
   { key: "story_chain", label: "Story Chain", sessionModel: "story_chain_sessions" },

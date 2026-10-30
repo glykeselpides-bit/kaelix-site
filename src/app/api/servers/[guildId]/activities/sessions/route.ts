@@ -32,6 +32,18 @@ type SessionRow = {
 
 const SESSION_CONFIGS: SessionConfig[] = [
   {
+    activityKey: "quiz",
+    label: "Quiz",
+    modelName: "activity_sessions",
+    endedField: "ended_at",
+  },
+  {
+    activityKey: "true_false",
+    label: "True or False",
+    modelName: "true_false_sessions",
+    endedField: "ended_at",
+  },
+  {
     activityKey: "caption_this",
     label: "Caption This",
     modelName: "caption_this_sessions",
@@ -65,12 +77,6 @@ const SESSION_CONFIGS: SessionConfig[] = [
     activityKey: "hot_takes",
     label: "Hot Takes",
     modelName: "hot_takes_sessions",
-    endedField: "ended_at",
-  },
-  {
-    activityKey: "mcq",
-    label: "Multiple Choice",
-    modelName: "mcq_sessions",
     endedField: "ended_at",
   },
   {

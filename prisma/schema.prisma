@@ -36,12 +36,27 @@ model activity_questions {
 
 model activity_sessions {
   id                  Int       @id @default(autoincrement())
+  guild_id            BigInt?
   is_active           Boolean
   started_at          DateTime  @db.Timestamptz(6)
   ended_at            DateTime? @db.Timestamptz(6)
   current_question_id Int?
   question_number     Int
   question_pool       Json      @db.Json
+}
+
+/// Quiz sessions live in activity_sessions (above); True or False in this table.
+/// Both are created by the bot (bot/models/true_false.py).
+model true_false_sessions {
+  id              Int       @id @default(autoincrement())
+  guild_id        BigInt
+  is_active       Boolean
+  question_id     Int?
+  question_pool   Json      @db.Json
+  question_number Int
+  started_at      DateTime  @db.Timestamptz(6)
+  ended_at        DateTime? @db.Timestamptz(6)
+  winner_user_id  BigInt?
 }
 
 model activity_settings {
