@@ -46,25 +46,41 @@ const CACHE_MS = 60_000;
 const cache = new Map<string, { expires: number; result: Promise<GuildListResult> }>();
 
 async function fetchGuilds(accessToken: string): Promise<GuildListResult> {
-  try {
-    const response = await fetch("https://discord.com/api/users/@me/guilds", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: "no-store",
-    });
+  // A dashboard page makes several API calls at once and each one checks
+  // access, which can trip Discord's rate limit on this endpoint. When
+  // Discord says "slow down" (429), wait as long as it asks and try again.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const response = await fetch("https://discord.com/api/users/@me/guilds", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: "no-store",
+      });
 
-    if (response.status === 401) {
-      return { ok: false, reason: "login_expired" };
-    }
+      if (response.status === 401) {
+        return { ok: false, reason: "login_expired" };
+      }
 
-    if (!response.ok) {
+      if (response.status === 429) {
+        const body = await response.json().catch(() => ({}));
+        const header = Number(response.headers.get("retry-after"));
+        const seconds =
+          typeof body?.retry_after === "number" ? body.retry_after : Number.isFinite(header) ? header : 1;
+        await new Promise((resolve) => setTimeout(resolve, Math.min(Math.max(seconds, 0.2), 3) * 1000));
+        continue;
+      }
+
+      if (!response.ok) {
+        return { ok: false, reason: "discord_unavailable" };
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? { ok: true, guilds: data } : { ok: false, reason: "discord_unavailable" };
+    } catch {
       return { ok: false, reason: "discord_unavailable" };
     }
-
-    const data = await response.json();
-    return Array.isArray(data) ? { ok: true, guilds: data } : { ok: false, reason: "discord_unavailable" };
-  } catch {
-    return { ok: false, reason: "discord_unavailable" };
   }
+
+  return { ok: false, reason: "discord_unavailable" };
 }
 
 /** The logged-in user's Discord servers (all of them, not just manageable ones). */
