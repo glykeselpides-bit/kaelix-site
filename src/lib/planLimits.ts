@@ -164,3 +164,39 @@ export async function checkCustomFactionAllowed(
       : `This server has ${used} of its ${limit} active custom factions on the ${planLabel} plan. Upgrade for more, or switch one off.`
   );
 }
+
+/**
+ * Which games each plan includes, using the website's activity keys. Matches
+ * PLAN_ACTIVITIES in the bot (bot/entitlements/defaults.py). Elite: all.
+ */
+const FREE_GAMES = ["riddle", "would_you_rather", "true_false"];
+const CORE_GAMES = [...FREE_GAMES, "quiz", "cipher", "hidden_word", "story_chain"];
+const PRO_GAMES = [
+  ...CORE_GAMES,
+  "caption_this",
+  "meme_war",
+  "gif_battle",
+  "two_truths_lie",
+  "hot_takes",
+];
+
+const PLAN_GAMES: Record<PlanId, Set<string> | null> = {
+  FREE: new Set(FREE_GAMES),
+  CORE: new Set(CORE_GAMES),
+  PRO: new Set(PRO_GAMES),
+  ELITE: null,
+};
+
+const PLAN_ORDER: PlanId[] = ["FREE", "CORE", "PRO", "ELITE"];
+const PLAN_NAMES: Record<PlanId, string> = { FREE: "Free", CORE: "Core", PRO: "Pro", ELITE: "Elite" };
+
+export function planIncludesGame(plan: PlanId, activityKey: string): boolean {
+  const games = PLAN_GAMES[plan] ?? PLAN_GAMES.FREE;
+  return games === null || games.has(activityKey);
+}
+
+/** Name of the cheapest plan that includes this game ("Free", "Core", ...). */
+export function lowestPlanForGame(activityKey: string): string {
+  const plan = PLAN_ORDER.find((p) => planIncludesGame(p, activityKey)) ?? "ELITE";
+  return PLAN_NAMES[plan];
+}

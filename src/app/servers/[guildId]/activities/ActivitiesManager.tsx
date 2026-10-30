@@ -14,6 +14,10 @@ import {
 export type ActivitySetting = {
   activityKey: string;
   label: string;
+  /** False when the server's plan doesn't include this game (the bot won't start it). */
+  includedInPlan?: boolean;
+  /** Cheapest plan that includes it: "Free", "Core", "Pro" or "Elite". */
+  requiredPlan?: string;
   enabled: boolean;
   rewardPoints: number;
   cooldownSeconds: number;
@@ -86,8 +90,9 @@ function getChannelLabel(channels: DiscordChannel[], channelId: string) {
 function formatCooldown(seconds: string) {
   const parsed = Number(seconds);
 
+  // 0 means the bot's default cooldown.
   if (!Number.isFinite(parsed) || parsed <= 0) {
-    return "No cooldown";
+    return "10s cooldown (default)";
   }
 
   if (parsed >= 60 && parsed % 60 === 0) {
@@ -312,6 +317,11 @@ export default function ActivitiesManager({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-bold text-white">{activity.label}</span>
+                    {activity.includedInPlan === false ? (
+                      <span className="rounded-full bg-amber-300/10 px-2 py-1 text-[11px] font-bold text-amber-100">
+                        Needs {activity.requiredPlan}
+                      </span>
+                    ) : null}
                     <span
                       className={`rounded-full px-2 py-1 text-[11px] font-bold ${
                         draft.enabled
@@ -323,7 +333,11 @@ export default function ActivitiesManager({
                     </span>
                   </div>
                   <div className="mt-3 space-y-1 text-xs text-slate-400">
-                    <p>{draft.rewardPoints || 0} reward points</p>
+                    <p>
+                      {Number(draft.rewardPoints) > 0
+                        ? `${draft.rewardPoints} reward points`
+                        : "Default rewards"}
+                    </p>
                     <p>{formatCooldown(draft.cooldownSeconds)}</p>
                     <p>{getChannelLabel(channels, draft.channelId)}</p>
                   </div>
@@ -344,6 +358,12 @@ export default function ActivitiesManager({
                       ? "Dashboard-managed"
                       : "Using defaults until saved"}
                   </p>
+                  {selectedActivity.includedInPlan === false ? (
+                    <p className="mt-1 text-sm text-amber-200">
+                      Not included in this server&apos;s plan. It can be started
+                      from the {selectedActivity.requiredPlan} plan.
+                    </p>
+                  ) : null}
                 </div>
                 <label className="inline-flex items-center gap-3 text-sm font-semibold text-slate-200">
                   <input
@@ -364,6 +384,11 @@ export default function ActivitiesManager({
                   label="Reward points"
                   value={selectedDraft.rewardPoints}
                   disabled={isBusy}
+                  helperText={
+                    selectedActivity.activityKey === "trivia"
+                      ? "Points for a correct answer; streaks and bonuses scale with it. Use 0 for the game's own amounts."
+                      : "Points each winner or correct answer gets. Use 0 for the game's own amounts."
+                  }
                   onChange={(rewardPoints) =>
                     updateSelectedDraft({ rewardPoints })
                   }
@@ -378,7 +403,7 @@ export default function ActivitiesManager({
                       ? `Current cooldown: ${formatCooldown(
                           selectedDraft.cooldownSeconds
                         )}`
-                      : "Use 0 for no cooldown."
+                      : "Seconds before this game can be started again. Use 0 for the default (10 seconds)."
                   }
                   onChange={(cooldownSeconds) =>
                     updateSelectedDraft({ cooldownSeconds })
@@ -392,7 +417,7 @@ export default function ActivitiesManager({
                   disabled={isBusy}
                   label="Activity channel"
                   placeholder="Any channel"
-                  helperText=""
+                  helperText="If set, this game can only be started in this channel."
                   onChange={(channelId) => updateSelectedDraft({ channelId })}
                 />
               </div>

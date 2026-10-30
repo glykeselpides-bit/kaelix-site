@@ -9,6 +9,8 @@ import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 import { guardGuild } from "@/lib/guildAccess";
+import { lowestPlanForGame, planIncludesGame } from "@/lib/planLimits";
+import { getServerPlan, type PlanId } from "@/lib/serverPlan";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -17,7 +19,8 @@ export const revalidate = 0;
 type ActivityCatalogItem = {
   key: string;
   label: string;
-  sessionModel: keyof ReturnType<typeof getPrisma>;
+  /** Table counted for session stats; none for games the website can't count yet. */
+  sessionModel?: keyof ReturnType<typeof getPrisma>;
   endedField?: string;
 };
 
@@ -59,23 +62,26 @@ type ActivityPatch = {
   channelId?: string | null;
 };
 
+// The 17 games in the bot's activity hub, with the keys the bot reads
+// (bot/services/activity_settings_service.py SITE_KEYS).
 const ACTIVITY_CATALOG: ActivityCatalogItem[] = [
-  { key: "caption_this", label: "Caption This", sessionModel: "caption_this_sessions" },
-  { key: "cipher", label: "Cipher", sessionModel: "cipher_sessions" },
-  { key: "emoji_race", label: "Emoji Race", sessionModel: "emoji_race_sessions" },
-  { key: "gif_battle", label: "GIF Battle", sessionModel: "gif_battle_sessions" },
-  { key: "hidden_word", label: "Hidden Word", sessionModel: "hidden_word_sessions" },
-  { key: "hot_takes", label: "Hot Takes", sessionModel: "hot_takes_sessions" },
-  { key: "mcq", label: "Multiple Choice", sessionModel: "mcq_sessions" },
-  { key: "meme_war", label: "Meme War", sessionModel: "meme_war_sessions" },
-  { key: "puzzle_drop", label: "Puzzle Drop", sessionModel: "puzzle_drop_sessions" },
-  { key: "reflex", label: "Reflex", sessionModel: "reflex_sessions" },
   { key: "riddle", label: "Riddle", sessionModel: "riddle_sessions" },
-  { key: "speed_typing", label: "Speed Typing", sessionModel: "speed_typing_sessions" },
-  { key: "story_chain", label: "Story Chain", sessionModel: "story_chain_sessions" },
-  { key: "trivia", label: "Trivia", sessionModel: "trivia_sessions" },
-  { key: "two_truths_lie", label: "Two Truths and a Lie", sessionModel: "two_truths_lie_sessions" },
   { key: "would_you_rather", label: "Would You Rather", sessionModel: "wyr_sessions", endedField: "ends_at" },
+  { key: "true_false", label: "True or False" },
+  { key: "quiz", label: "Quiz" },
+  { key: "cipher", label: "Cipher", sessionModel: "cipher_sessions" },
+  { key: "hidden_word", label: "Hidden Word", sessionModel: "hidden_word_sessions" },
+  { key: "story_chain", label: "Story Chain", sessionModel: "story_chain_sessions" },
+  { key: "caption_this", label: "Caption This", sessionModel: "caption_this_sessions" },
+  { key: "meme_war", label: "Meme War", sessionModel: "meme_war_sessions" },
+  { key: "gif_battle", label: "GIF Battle", sessionModel: "gif_battle_sessions" },
+  { key: "two_truths_lie", label: "Two Truths and a Lie", sessionModel: "two_truths_lie_sessions" },
+  { key: "hot_takes", label: "Hot Takes", sessionModel: "hot_takes_sessions" },
+  { key: "trivia", label: "Trivia", sessionModel: "trivia_sessions" },
+  { key: "reflex", label: "Reflex Arena", sessionModel: "reflex_sessions" },
+  { key: "emoji_race", label: "Emoji Race", sessionModel: "emoji_race_sessions" },
+  { key: "speed_typing", label: "Speed Typing", sessionModel: "speed_typing_sessions" },
+  { key: "puzzle_drop", label: "Puzzle Drop", sessionModel: "puzzle_drop_sessions" },
 ];
 
 const ACTIVITY_KEYS = new Set(ACTIVITY_CATALOG.map((activity) => activity.key));
@@ -142,11 +148,14 @@ function isKnownMissingTableError(error: unknown) {
 
 function toActivitySettingResponse(
   activity: ActivityCatalogItem,
-  setting?: ActivitySettingRecord
+  setting?: ActivitySettingRecord,
+  plan?: PlanId
 ) {
   return {
     activityKey: activity.key,
     label: activity.label,
+    includedInPlan: plan ? planIncludesGame(plan, activity.key) : true,
+    requiredPlan: lowestPlanForGame(activity.key),
     enabled: setting?.enabled ?? true,
     rewardPoints: setting?.reward_points ?? 0,
     cooldownSeconds: setting?.cooldown_seconds ?? 0,
@@ -296,6 +305,10 @@ async function getSessionResult(
   guildIdBigInt: bigint,
   activity: ActivityCatalogItem
 ): Promise<ActivitySessionResult> {
+  if (!activity.sessionModel) {
+    return { activity, active: 0, total: 0, recent: [] };
+  }
+
   try {
     const delegate = getModelDelegate(prisma, activity.sessionModel);
     const [active, total, recent] = await Promise.all([
@@ -354,6 +367,9 @@ async function getActivityPayload(guildIdBigInt: bigint) {
   );
 
   const storedSettings = await getStoredActivitySettings(prisma, guildIdBigInt);
+  const { plan } = await getServerPlan(prisma, guildIdBigInt).catch(() => ({
+    plan: undefined,
+  }));
   const settingsByKey = new Map(
     storedSettings.map((setting) => [setting.activity_key, setting])
   );
@@ -387,7 +403,7 @@ async function getActivityPayload(guildIdBigInt: bigint) {
       ).length,
     },
     activities: ACTIVITY_CATALOG.map((activity) =>
-      toActivitySettingResponse(activity, settingsByKey.get(activity.key))
+      toActivitySettingResponse(activity, settingsByKey.get(activity.key), plan)
     ),
     recentSessions,
   };
