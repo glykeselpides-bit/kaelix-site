@@ -8,6 +8,7 @@ import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 import { guardGuild } from "@/lib/guildAccess";
+import { checkFeatureAllowed } from "@/lib/planLimits";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -347,6 +348,16 @@ export async function PATCH(
         { error: "No settings found for this server yet." },
         { status: 404 }
       );
+    }
+
+    // Turning the weekly summary on is a Core feature. Leaving it as it is,
+    // or turning it off, is always allowed.
+    if (
+      validation.data.weekly_summary_enabled === true &&
+      !existingConfig.weekly_summary_enabled
+    ) {
+      const locked = await checkFeatureAllowed(prisma, guildIdBigInt, "weeklySummary");
+      if (locked) return locked;
     }
 
     const hasExtraSettingsPatch =

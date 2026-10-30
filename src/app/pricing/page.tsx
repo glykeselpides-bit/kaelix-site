@@ -45,12 +45,12 @@ const plans = [
       "Up to 1,000 server members",
       "100 events/month",
       "12 activities",
-      "Faction activity battles",
+      "Trivia: Faction activity battles",
       "Analytics & progression systems",
       "Expanded faction systems",
     ],
     activities:
-      "Core + Caption This, Meme War, GIF Battle, Two Truths and a Lie, Hot Takes",
+      "Core + Caption This, Meme War, GIF Battle, Two Truths and a Lie, Trivia",
     button: "Choose Pro",
     highlight: true,
   },
@@ -68,7 +68,7 @@ const plans = [
       "Full custom activity shop",
     ],
     activities:
-      "Everything, including Trivia, Reflex Arena, Emoji Race, Speed Typing and Puzzle Drop",
+      "Everything, including Hot Takes, Reflex Arena, Emoji Race, Speed Typing and Puzzle Drop",
     button: "Contact Kaelix",
     highlight: false,
   },

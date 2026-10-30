@@ -177,7 +177,7 @@ const PRO_GAMES = [
   "meme_war",
   "gif_battle",
   "two_truths_lie",
-  "hot_takes",
+  "trivia",
 ];
 
 const PLAN_GAMES: Record<PlanId, Set<string> | null> = {
@@ -199,4 +199,46 @@ export function planIncludesGame(plan: PlanId, activityKey: string): boolean {
 export function lowestPlanForGame(activityKey: string): string {
   const plan = PLAN_ORDER.find((p) => planIncludesGame(p, activityKey)) ?? "ELITE";
   return PLAN_NAMES[plan];
+}
+
+/**
+ * Plan-only features the dashboard shows or switches on, matching
+ * PLAN_FEATURES in the bot (bot/entitlements/defaults.py).
+ */
+const FEATURE_MIN_PLAN = {
+  analytics: "PRO",
+  weeklySummary: "CORE",
+} as const satisfies Record<string, PlanId>;
+
+export type PlanFeature = keyof typeof FEATURE_MIN_PLAN;
+
+const FEATURE_NAMES: Record<PlanFeature, string> = {
+  analytics: "Analytics",
+  weeklySummary: "Weekly server summary",
+};
+
+export function planHasFeature(plan: PlanId, feature: PlanFeature): boolean {
+  return PLAN_ORDER.indexOf(plan) >= PLAN_ORDER.indexOf(FEATURE_MIN_PLAN[feature]);
+}
+
+/** e.g. "Pro": the cheapest plan with this feature. */
+export function featurePlanName(feature: PlanFeature): string {
+  return PLAN_NAMES[FEATURE_MIN_PLAN[feature]];
+}
+
+/** null if this server's plan includes the feature, otherwise the response to send back. */
+export async function checkFeatureAllowed(
+  prisma: PrismaClient,
+  guildId: bigint,
+  feature: PlanFeature
+): Promise<NextResponse | null> {
+  const { plan, planLabel } = await getServerPlan(prisma, guildId);
+
+  if (planHasFeature(plan, feature)) {
+    return null;
+  }
+
+  return refuse(
+    `${FEATURE_NAMES[feature]} is included from the ${featurePlanName(feature)} plan. This server is on ${planLabel}.`
+  );
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { invalidGuildIdResponse, parseGuildId } from "@/lib/dashboardApi";
 import { getPrisma } from "@/lib/prisma";
 import { guardGuild } from "@/lib/guildAccess";
+import { checkFeatureAllowed } from "@/lib/planLimits";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -23,6 +24,9 @@ export async function GET(
 
   try {
     const prisma = getPrisma();
+
+    const locked = await checkFeatureAllowed(prisma, guildIdBigInt, "analytics");
+    if (locked) return locked;
     const [
       trackedUsers,
       points,
