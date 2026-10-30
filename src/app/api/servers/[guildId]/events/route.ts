@@ -9,6 +9,7 @@ import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 import { guardGuild } from "@/lib/guildAccess";
+import { checkEventAllowed } from "@/lib/planLimits";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -385,6 +386,10 @@ export async function POST(
 
   try {
     const prisma = getPrisma();
+
+    const overLimit = await checkEventAllowed(prisma, guildIdBigInt);
+    if (overLimit) return overLimit;
+
     const event = await createEventWithCode(prisma, {
       ...validation.data,
       guild_id: guildIdBigInt,

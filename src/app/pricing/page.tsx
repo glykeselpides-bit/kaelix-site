@@ -11,7 +11,7 @@ const plans = [
     features: [
       "Up to 60 server members",
       "10 events/month",
-      "3 active activities",
+      "3 activities",
       "1 preset Kaelix faction pack",
       "Server notifications only",
     ],
@@ -26,14 +26,14 @@ const plans = [
     features: [
       "Up to 200 server members",
       "30 events/month",
-      "8 active activities",
+      "7 activities",
       "Custom factions up to 4",
       "DM notifications",
       "Weekly server summary",
       "Achievement & activity alerts",
     ],
     activities:
-      "Quiz, Cipher, Hidden Word, Story Chain, Caption This",
+      "Free + Quiz, Cipher, Hidden Word, Story Chain",
     button: "Choose Core",
     highlight: false,
   },
@@ -44,13 +44,13 @@ const plans = [
     features: [
       "Up to 1,000 server members",
       "100 events/month",
-      "16 active activities",
-      "Full activity library",
+      "12 activities",
       "Faction activity battles",
       "Analytics & progression systems",
       "Expanded faction systems",
     ],
-    activities: "All Activities Included",
+    activities:
+      "Core + Caption This, Meme War, GIF Battle, Two Truths and a Lie, Hot Takes",
     button: "Choose Pro",
     highlight: true,
   },
@@ -67,7 +67,8 @@ const plans = [
       "Custom branding",
       "Full custom activity shop",
     ],
-    activities: "Everything Included",
+    activities:
+      "Everything, including Trivia, Reflex Arena, Emoji Race, Speed Typing and Puzzle Drop",
     button: "Contact Kaelix",
     highlight: false,
   },

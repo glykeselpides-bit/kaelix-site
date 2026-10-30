@@ -9,6 +9,7 @@ import { logDashboardAction } from "@/lib/dashboardAudit";
 import { getPrisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma";
 import { guardGuild } from "@/lib/guildAccess";
+import { checkCustomFactionAllowed, isCustomFactionKey } from "@/lib/planLimits";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -358,6 +359,16 @@ export async function POST(
 
   try {
     const prisma = getPrisma();
+
+    if (validation.data.is_active !== false) {
+      const overLimit = await checkCustomFactionAllowed(
+        prisma,
+        guildIdBigInt,
+        String(validation.data.key)
+      );
+      if (overLimit) return overLimit;
+    }
+
     const faction = await prisma.factions.create({
       data: {
         ...validation.data,
@@ -445,7 +456,7 @@ export async function PATCH(
         id: validation.id,
         guild_id: guildIdBigInt,
       },
-      select: { id: true, name: true, is_active: true },
+      select: { id: true, name: true, key: true, is_active: true },
     });
 
     if (!existingFaction) {
@@ -453,6 +464,27 @@ export async function PATCH(
         { error: "Faction was not found for this server." },
         { status: 404 }
       );
+    }
+
+    // Switching on a custom faction (or renaming an active preset's key to a
+    // custom one) counts against the plan's custom faction limit.
+    const patch = validation.data as { key?: unknown; is_active?: unknown };
+    const nextKey = typeof patch.key === "string" ? patch.key : existingFaction.key;
+    const nextActive =
+      typeof patch.is_active === "boolean" ? patch.is_active : existingFaction.is_active;
+    const becomesActiveCustom =
+      nextActive &&
+      isCustomFactionKey(nextKey) &&
+      !(existingFaction.is_active && isCustomFactionKey(existingFaction.key));
+
+    if (becomesActiveCustom) {
+      const overLimit = await checkCustomFactionAllowed(
+        prisma,
+        guildIdBigInt,
+        nextKey,
+        existingFaction.id
+      );
+      if (overLimit) return overLimit;
     }
 
     const faction = await prisma.factions.update({
