@@ -12,6 +12,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
 
+  // A login that fails (e.g. "Code challenge failed" after a double-click, or Discord sending a
+  // phone user back to a different browser) comes back to /login with an explanation,
+  // instead of Auth.js's bare "Server error" page.
+  pages: {
+    error: "/login",
+  },
+
   callbacks: {
     async jwt({ token, account }) {
       if (account) {

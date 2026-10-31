@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import LoginButton from "@/components/LoginButton";
 
 export type AccessProblem =
   | "not_logged_in"
@@ -60,15 +60,11 @@ export default function GuildAccessNotice({
 
       <div className="mt-6 flex flex-wrap gap-3">
         {(reason === "not_logged_in" || reason === "login_expired") && (
-          <button
-            type="button"
-            onClick={() =>
-              signIn("discord", { callbackUrl: window.location.href })
-            }
-            className={primary}
-          >
-            {reason === "login_expired" ? "Log in again" : "Log in with Discord"}
-          </button>
+          <LoginButton
+            callbackUrl="current"
+            label={reason === "login_expired" ? "Log in again" : "Log in with Discord"}
+            className={`${primary} disabled:cursor-wait disabled:opacity-70`}
+          />
         )}
 
         {(reason === "discord_unavailable" ||
