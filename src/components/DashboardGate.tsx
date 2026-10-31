@@ -145,13 +145,13 @@ export default function DashboardGate() {
   );
 
   return (
-    <div className="mt-12 w-full max-w-5xl rounded-[32px] border border-white/10 bg-black/40 p-8 backdrop-blur-xl">
+    <div className="mt-12 w-full min-w-0 max-w-5xl rounded-[32px] border border-white/10 bg-black/40 p-5 backdrop-blur-xl sm:p-8">
       <div className="flex flex-col gap-3 border-b border-white/10 pb-8 text-left">
         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-blue-300">
           Logged in as
         </p>
 
-        <h2 className="text-4xl font-bold text-white">
+        <h2 className="break-words text-3xl font-bold text-white sm:text-4xl">
           {session.user?.name}
         </h2>
 
@@ -198,20 +198,21 @@ export default function DashboardGate() {
           return (
             <div
               key={guild.id}
-              className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-blue-400/40 hover:bg-blue-500/[0.03]"
+              className="min-w-0 rounded-3xl border border-white/10 bg-white/[0.03] p-5 text-left transition hover:border-blue-400/40 hover:bg-blue-500/[0.03] sm:p-6"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-2xl font-bold text-white">
+              {/* Phones: the badge sits above the name. Wider screens: badge on the right. */}
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <h3 className="break-words text-xl font-bold text-white sm:text-2xl">
                     {guild.name}
                   </h3>
 
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="mt-2 break-words text-sm text-slate-400">
                     Server ID: {guild.id}
                   </p>
                 </div>
 
-                <div className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                <div className="self-start shrink-0 whitespace-nowrap rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-blue-200">
                   {isConnected ? "Connected" : "Invite Kaelix"}
                 </div>
               </div>
