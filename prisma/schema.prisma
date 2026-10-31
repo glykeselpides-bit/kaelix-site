@@ -1086,3 +1086,156 @@ model wyr_votes {
   choice     String   @db.VarChar(1)
   created_at DateTime @db.Timestamptz(6)
 }
+
+// ---------------------------------------------------------------------------
+// Community tools and Pro systems. These tables are created and owned by the
+// bot (SQLAlchemy create_all), so there are no migrations for them here.
+// Column defaults live in the bot's Python code, not the database, so every
+// insert from the website must set every required column.
+// ---------------------------------------------------------------------------
+
+model welcome_settings {
+  guild_id           BigInt  @id
+  welcome_enabled    Boolean
+  welcome_channel_id BigInt?
+  welcome_message    String  @db.VarChar(1000)
+  welcome_card       Boolean
+  leave_enabled      Boolean
+  leave_channel_id   BigInt?
+  leave_message      String  @db.VarChar(1000)
+  leave_card         Boolean
+}
+
+model automod_settings {
+  guild_id            BigInt  @id
+  enabled             Boolean
+  block_spam          Boolean
+  block_mass_mentions Boolean
+  mention_limit       Int
+  block_invites       Boolean
+  block_links         Boolean
+  banned_words        Json    @db.Json
+  warn_threshold      Int
+  timeout_minutes     Int
+  exempt_role_ids     Json    @db.Json
+  exempt_channel_ids  Json    @db.Json
+  log_channel_id      BigInt?
+}
+
+model mod_cases {
+  id               Int      @id @default(autoincrement())
+  guild_id         BigInt
+  user_id          BigInt
+  moderator_id     BigInt?
+  action           String   @db.VarChar(20)
+  reason           String?  @db.VarChar(500)
+  duration_minutes Int?
+  active           Boolean
+  created_at       DateTime @db.Timestamptz(6)
+
+  @@index([guild_id], map: "ix_mod_cases_guild_id")
+}
+
+model leveling_settings {
+  guild_id            BigInt  @id
+  announce            Boolean
+  levelup_channel_id  BigInt?
+  levelup_message     String? @db.VarChar(500)
+  stack_rewards       Boolean
+  role_multipliers    Json    @db.Json
+  channel_multipliers Json    @db.Json
+  anti_farm           Boolean
+  min_message_length  Int
+}
+
+model level_role_rewards {
+  id       Int    @id @default(autoincrement())
+  guild_id BigInt
+  level    Int
+  role_id  BigInt
+
+  @@unique([guild_id, role_id], map: "uq_level_reward_guild_role")
+  @@index([guild_id], map: "ix_level_role_rewards_guild_id")
+}
+
+model autopilot_schedules {
+  id               Int       @id @default(autoincrement())
+  guild_id         BigInt
+  channel_id       BigInt
+  activity_key     String    @db.VarChar(30)
+  trivia_mode      String    @db.VarChar(20)
+  weekday          Int
+  hour             Int
+  minute           Int
+  timezone         String    @db.VarChar(50)
+  title            String?   @db.VarChar(100)
+  ping_role_id     BigInt?
+  remind_minutes   Int
+  run_minutes      Int
+  close_at         DateTime? @db.Timestamptz(6)
+  options          Json?     @db.Json
+  enabled          Boolean
+  last_run_at      DateTime? @db.Timestamptz(6)
+  last_reminded_at DateTime? @db.Timestamptz(6)
+  created_by       BigInt
+  created_at       DateTime  @db.Timestamptz(6)
+
+  @@index([guild_id], map: "ix_autopilot_schedules_guild_id")
+}
+
+model autopilot_images {
+  id           Int       @id @default(autoincrement())
+  guild_id     BigInt
+  filename     String    @db.VarChar(100)
+  content_type String?   @db.VarChar(50)
+  data         Bytes?
+  url          String?   @db.VarChar(500)
+  last_used_at DateTime? @db.Timestamptz(6)
+  created_by   BigInt
+  created_at   DateTime  @db.Timestamptz(6)
+
+  @@index([guild_id], map: "ix_autopilot_images_guild_id")
+}
+
+model stream_alerts {
+  id           Int      @id @default(autoincrement())
+  guild_id     BigInt
+  platform     String   @db.VarChar(10)
+  account      String   @db.VarChar(100)
+  display_name String   @db.VarChar(100)
+  channel_id   BigInt
+  ping_role_id BigInt?
+  message      String?  @db.VarChar(500)
+  last_seen    String?  @db.VarChar(100)
+  created_by   BigInt
+  created_at   DateTime @db.Timestamptz(6)
+
+  @@index([guild_id], map: "ix_stream_alerts_guild_id")
+}
+
+model custom_commands {
+  id         Int      @id @default(autoincrement())
+  guild_id   BigInt
+  name       String   @db.VarChar(32)
+  response   String   @db.VarChar(2000)
+  role_id    BigInt?
+  uses       Int
+  created_by BigInt
+  created_at DateTime @db.Timestamptz(6)
+
+  @@unique([guild_id, name], map: "uq_custom_command_guild_name")
+  @@index([guild_id], map: "ix_custom_commands_guild_id")
+}
+
+model auto_responders {
+  id         Int      @id @default(autoincrement())
+  guild_id   BigInt
+  trigger    String   @db.VarChar(100)
+  match      String   @db.VarChar(10)
+  response   String   @db.VarChar(2000)
+  uses       Int
+  created_by BigInt
+  created_at DateTime @db.Timestamptz(6)
+
+  @@index([guild_id], map: "ix_auto_responders_guild_id")
+}

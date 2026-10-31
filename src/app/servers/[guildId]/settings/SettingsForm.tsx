@@ -258,8 +258,8 @@ export default function SettingsForm({
             />
 
             <Toggle
-              label="Welcome Messages"
-              description="Enable welcome behavior for new server members."
+              label="Onboarding welcome"
+              description="Older onboarding switch. Member welcome and goodbye messages now have their own page: Welcome & Goodbye."
               checked={settings.welcome_enabled}
               disabled={isSaving}
               onChange={(checked) =>

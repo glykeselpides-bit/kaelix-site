@@ -29,6 +29,8 @@ const sections = [
     paragraphs: [
       "Discord server owners and administrators are responsible for authorising Kaelix's installation, reviewing permissions, configuring features appropriately, managing their communities, and complying with applicable laws and Discord policies.",
       "Kaelix provides community management tools but does not assume responsibility for independent decisions made by server administrators.",
+      "This includes moderation and AutoMod: warnings, timeouts, kicks, bans, deleted messages and other actions are taken on behalf of the server, under rules its administrators choose. Appeals about those actions should go to the server's own staff.",
+      "Only server administrators (members with the Manage Server permission) may buy, change or cancel a Kaelix plan for a server. A plan applies to the whole server.",
     ],
   },
   {
@@ -43,6 +45,7 @@ const sections = [
       "Distribute malicious content, spam, or prohibited material.",
       "Submit content that infringes intellectual property rights or violates applicable laws.",
       "Circumvent access restrictions or abuse premium functionality.",
+      "Use custom bot branding, custom commands, auto-responders, automations or any other Kaelix feature to impersonate another bot, brand, company, Discord, its staff, or any real person.",
     ],
     closing:
       "We may investigate suspected misuse and restrict access where reasonably necessary to protect Kaelix, its users, or its infrastructure.",
@@ -103,7 +106,17 @@ const sections = [
     ],
   },
   {
-    title: "10. Intellectual Property",
+    title: "10. Custom Branding, Networks and Integrations",
+    paragraphs: [
+      "On plans that include it, server administrators can change how Kaelix appears in their server, including its name, avatar, banner and bio, and can show their server's own name and icon on Kaelix's embeds and images. These changes apply only in that server.",
+      "Custom branding must not imitate or impersonate other bots, brands, companies, Discord, Discord staff, or real people, and must not mislead members about who operates the bot. Kaelix may refuse names that appear to do this, and may reset branding, or restrict the feature for a server, where branding breaks this rule or is reported as impersonation.",
+      "Branding does not transfer any rights in the Kaelix name or software, and Kaelix remains the provider of the service.",
+      "Cross-server networks, tournaments and Network Trivia Night share a server's name, scores and rankings with the other servers in the same network. The network's host server controls who is in it and can remove servers.",
+      "Live and upload alerts link to content on third-party platforms such as Twitch, Kick and YouTube. Kaelix does not control that content, and those platforms' own terms apply to it.",
+    ],
+  },
+  {
+    title: "11. Intellectual Property",
     paragraphs: [
       "The Kaelix name, branding, original software, designs, documentation, and proprietary materials belong to their respective rights holders.",
       "Users are granted permission to access and use Kaelix in accordance with these Terms.",
@@ -112,7 +125,7 @@ const sections = [
     ],
   },
   {
-    title: "11. Suspension and Termination",
+    title: "12. Suspension and Termination",
     paragraphs: [
       "We may suspend, restrict, or terminate access where reasonably necessary due to serious or repeated violations of these Terms, security concerns, fraud, abuse, legal requirements, or misuse threatening the service or other users.",
       "Server administrators may remove Kaelix from their Discord servers at any time.",
@@ -120,7 +133,7 @@ const sections = [
     ],
   },
   {
-    title: "12. Disclaimers and Limitations of Liability",
+    title: "13. Disclaimers and Limitations of Liability",
     paragraphs: [
       "Kaelix is an evolving service, and some functionality remains experimental.",
       "To the extent permitted by applicable law, we do not guarantee that the service will always be available, uninterrupted, secure, or free from defects.",
@@ -130,14 +143,14 @@ const sections = [
     ],
   },
   {
-    title: "13. Privacy and Data Protection",
+    title: "14. Privacy and Data Protection",
     paragraphs: [
       "Information collected through Kaelix is handled in accordance with our Privacy Policy at https://joinkaelix.com/privacy.",
       "Users and administrators should review that policy to understand how information is collected, processed, and retained.",
     ],
   },
   {
-    title: "14. Changes to These Terms",
+    title: "15. Changes to These Terms",
     paragraphs: [
       "Kaelix is expected to undergo frequent updates and changes during its early-development phase.",
       "We may revise these Terms to reflect new functionality, subscription offerings, technical developments, security requirements, or changes in applicable laws and platform policies.",
@@ -146,7 +159,7 @@ const sections = [
     ],
   },
   {
-    title: "15. Governing Law",
+    title: "16. Governing Law",
     paragraphs: [
       "These Terms are governed by the laws of England and Wales, subject to applicable mandatory consumer protections and jurisdictional rights in other locations.",
     ],
@@ -173,7 +186,7 @@ export default function TermsPage() {
         </h1>
 
         <p className="mt-4 text-sm text-slate-400">
-          Last updated: 24 October 2026
+          Last updated: 31 October 2026
         </p>
 
         <div className="mt-10 rounded-xl border border-violet-500/30 bg-violet-500/10 p-6">
@@ -224,7 +237,7 @@ export default function TermsPage() {
 
         <section className="mt-12 border-t border-white/10 pt-10">
           <h2 className="mb-4 text-2xl font-semibold text-white">
-            16. Contact
+            17. Contact
           </h2>
 
           <p className="leading-7 text-slate-300">

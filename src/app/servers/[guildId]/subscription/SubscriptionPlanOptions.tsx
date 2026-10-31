@@ -22,7 +22,7 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     id: "core",
     name: "Core",
-    price: "GBP 5.99/mo",
+    price: "GBP 4.99/mo",
     summary: "Useful defaults for active communities.",
     features: [
       "Activity configuration",
@@ -33,7 +33,7 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     id: "pro",
     name: "Pro",
-    price: "GBP 20.99/mo",
+    price: "GBP 18.99/mo",
     summary: "More room for advanced community operations.",
     features: [
       "Expanded analytics",

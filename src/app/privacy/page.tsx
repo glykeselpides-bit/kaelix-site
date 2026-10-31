@@ -19,10 +19,14 @@ const sections = [
       "User-provided information: optional age, birthday, personality preferences, biography, onboarding responses, captions, and other submissions.",
       "Website and administration information: Discord OAuth account information, server configurations, dashboard activity, and administrative action records.",
       "Technical information: error records, operational logs, and security-related events.",
+      "Server activity statistics: how many messages each member sends per day, how many messages each channel gets per hour, minutes spent in voice channels, and when members join or leave. These are counts only. Kaelix does not store the text of these messages.",
+      "Moderation records: warnings, timeouts, kicks, bans and AutoMod actions, with the member, the moderator, the reason, and when it happened.",
+      "Community tool settings: welcome and goodbye messages, AutoMod rules, custom commands, auto-responders, polls, giveaways and their entries, leveling settings, Autopilot schedules and the images uploaded for them, and automations.",
+      "Stream alert settings: the public Twitch, Kick or YouTube channels a server follows, and the last stream or video announced.",
       "Subscription information: for servers on a paid plan or free trial, the plan, its status, and its start, renewal and end dates. For purchases made through Discord, this includes the purchase record Discord sends us (purchase ID, server ID, the Discord user ID of the purchaser, and the plan purchased).",
     ],
     closing:
-      "Certain interactive features may process message content or user submissions. Where necessary for a feature, submitted content may also be stored.",
+      "Some features read messages as they are sent: AutoMod checks them against the server's rules, auto-responders, custom commands and automations look for their triggers, leveling checks message length, and some games read typed answers. That text is checked and then discarded. It is only stored where a feature needs it, such as game answers, story entries and submissions. Welcome and goodbye image cards use a member's display name and avatar to create the image, which is posted in the server and not kept by Kaelix.",
   },
   {
     title: "2. How We Use Information",
@@ -30,7 +34,9 @@ const sections = [
       "Operate and maintain the Discord bot and website.",
       "Provide games, rankings, achievements, and community features.",
       "Manage onboarding, server settings, and administrative tools.",
-      "Provide analytics, notifications, and reminders.",
+      "Provide analytics, server insights, notifications, and reminders.",
+      "Run moderation, AutoMod, welcome messages, and other community tools configured by server administrators.",
+      "Post live and upload alerts for the channels a server follows.",
       "Authenticate users and manage dashboard access.",
       "Prevent misuse, investigate errors, and maintain security.",
       "Respond to support and privacy requests.",
@@ -61,6 +67,8 @@ const sections = [
     title: "5. Data Sharing and Visibility",
     paragraphs: [
       "Information may be accessible to service providers, relevant Discord server administrators, and community members through features such as leaderboards, profiles, and game submissions.",
+      "Moderation records and server insights are visible to that server's staff.",
+      "In cross-server networks, tournaments and Network Trivia Night, a server's name, scores and rankings are shared with the other servers in the same network.",
       "Information may also be disclosed where required by applicable law.",
       "Visibility depends on the feature, server configuration, and relevant permissions.",
     ],
@@ -70,6 +78,7 @@ const sections = [
     paragraphs: [
       "Kaelix retains information for as long as reasonably necessary for the purposes for which it was collected, including service operation, security, and applicable legal obligations.",
       "Retention periods may vary by data category and feature. As Kaelix develops, retention and deletion procedures may be refined or automated.",
+      "Server activity statistics (message counts, voice minutes, joins and leaves) are deleted automatically after 120 days.",
       "Removing Kaelix from a Discord server does not necessarily result in immediate deletion of previously stored information.",
       "Users and server administrators may contact us to request deletion or enquire about retained information.",
     ],
@@ -102,7 +111,7 @@ const sections = [
   {
     title: "10. Third-Party Services",
     paragraphs: [
-      "Kaelix operates in connection with Discord and may integrate with other third-party services.",
+      "Kaelix operates in connection with Discord and may integrate with other third-party services, including Twitch, Kick and YouTube for live and upload alerts. Kaelix only reads public channel and stream information from these services.",
       "These services maintain their own terms and privacy policies. Kaelix is not responsible for their independent privacy practices.",
     ],
   },
@@ -144,7 +153,7 @@ export default function PrivacyPage() {
         </h1>
 
         <p className="mt-4 text-sm text-slate-400">
-          Last updated: 28 October 2026
+          Last updated: 31 October 2026
         </p>
 
         <div className="mt-10 rounded-xl border border-violet-500/30 bg-violet-500/10 p-6">

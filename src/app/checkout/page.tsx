@@ -18,13 +18,13 @@ const plans = [
   {
     id: "core" as const,
     name: "Core",
-    price: "£5.99/mo",
+    price: "£4.99/mo",
     summary: "For active, growing communities.",
   },
   {
     id: "pro" as const,
     name: "Pro",
-    price: "£20.99/mo",
+    price: "£18.99/mo",
     summary: "For larger, highly active communities.",
   },
 ];
@@ -76,6 +76,14 @@ export default async function CheckoutPage({
             server&apos;s plan unlocks automatically once the payment goes
             through.
           </p>
+
+          <div className="mt-6 max-w-2xl rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-sm leading-6 text-amber-100">
+            <span className="font-semibold">Server admins only.</span> A plan
+            applies to the whole server, so only its admins (members with the{" "}
+            <span className="font-semibold">Manage Server</span> permission)
+            can buy one. If you&apos;re not an admin, ask one of them to
+            upgrade.
+          </div>
 
           <section className="mt-12">
             <h2 className="text-2xl font-bold">Buy on the Discord store</h2>

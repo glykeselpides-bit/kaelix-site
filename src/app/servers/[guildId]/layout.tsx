@@ -13,8 +13,15 @@ const navigation = [
   { title: "Factions", href: "factions" },
   { title: "Activities", href: "activities" },
   { title: "Onboarding", href: "onboarding" },
+  { title: "Welcome & Goodbye", href: "welcome" },
+  { title: "AutoMod & Moderation", href: "moderation" },
+  { title: "Custom Commands", href: "custom-commands" },
+  { title: "Leveling", href: "leveling" },
+  { title: "Autopilot", href: "autopilot" },
+  { title: "Stream Alerts", href: "alerts" },
   { title: "Logs", href: "logs" },
   { title: "Analytics", href: "analytics" },
+  { title: "Insights", href: "insights" },
   { title: "Subscription", href: "subscription" },
 ];
 
@@ -75,7 +82,7 @@ export default async function ServerLayout({
             </div>
           </aside>
 
-          <div className="flex-1">{children}</div>
+          <div className="min-w-0 flex-1">{children}</div>
         </div>
       </div>
     </main>

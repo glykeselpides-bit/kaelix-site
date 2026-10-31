@@ -108,6 +108,42 @@ export default function CommandsPage() {
     },
 
     {
+      title: "Moderation & Community Tools",
+      commands: [
+        { name: "/mod", description: "Warn, timeout, kick, ban, unban and purge, with a saved case for every action.", tags: ["Admin", "Free"] },
+        { name: "/automod", description: "Block spam, mass mentions and invites (Free); banned words, links and auto-timeouts (Core+).", tags: ["Admin", "Free"] },
+        { name: "/welcome", description: "Welcome and leave messages; image cards on Core+.", tags: ["Admin", "Free"] },
+        { name: "/poll", description: "Button polls. Free: 2 active; Core+: unlimited with multiple choice.", tags: ["Admin", "Free"] },
+        { name: "/giveaway", description: "Giveaways with entry rules (Core+) and point entries (Pro+).", tags: ["Admin", "Free"] },
+        { name: "/customcommand", description: "Your server's own !commands. Core: 2, Pro+: unlimited with role actions.", tags: ["Admin", "Core+"] },
+        { name: "/autoresponder", description: "Automatic replies when someone says a trigger word.", tags: ["Admin", "Core+"] },
+      ],
+    },
+
+    {
+      title: "Pro Systems",
+      commands: [
+        { name: "/leveling", description: "Level role rewards, XP boosts, level-up messages and anti-farming.", tags: ["Admin", "Pro+"] },
+        { name: "/season", description: "Faction Seasons: timed faction wars with a Hall of Fame.", tags: ["Admin", "Pro+"] },
+        { name: "/autopilot", description: "Run any game automatically on a daily or weekly schedule.", tags: ["Admin", "Pro+"] },
+        { name: "/alerts", description: "Twitch and Kick live alerts, YouTube upload alerts.", tags: ["Admin", "Pro+"] },
+        { name: "/insights", description: "Best times to host, busiest channels, retention and which games bring people back.", tags: ["Admin", "Pro+"] },
+      ],
+    },
+
+    {
+      title: "Elite Systems",
+      commands: [
+        { name: "/network", description: "Link up with other Elite servers and compete in network seasons.", tags: ["Admin", "Elite"] },
+        { name: "/trivianight", description: "Live head-to-head trivia battles across your network.", tags: ["Admin", "Elite"] },
+        { name: "/tournament", description: "Knockout brackets between factions or servers.", tags: ["Admin", "Elite"] },
+        { name: "/game", description: "Build and run your own games.", tags: ["Admin", "Elite"] },
+        { name: "/automation", description: "When something happens, do something automatically.", tags: ["Admin", "Elite"] },
+        { name: "/branding", description: "Kaelix's name, avatar, banner and bio in your server.", tags: ["Admin", "Elite"] },
+      ],
+    },
+
+    {
       title: "Administration",
       commands: [
         {

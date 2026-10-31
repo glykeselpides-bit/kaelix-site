@@ -11,6 +11,9 @@ export function getPrisma() {
     new PrismaClient({
       adapter: new PrismaPg({
         connectionString: process.env.DATABASE_URL,
+        // Times are stored as UTC by the bot. Pin the session to UTC so dates the website saves or
+        // filters on can't be shifted by the database server's own time zone setting.
+        options: "-c timezone=UTC",
       }),
     });
 

@@ -16,7 +16,14 @@ export type DashboardEntityType =
   | "ONBOARDING"
   | "ACTIVITY"
   | "TRIVIA_QUESTION"
-  | "SETTINGS";
+  | "SETTINGS"
+  | "WELCOME"
+  | "AUTOMOD"
+  | "LEVELING"
+  | "AUTOPILOT"
+  | "STREAM_ALERT"
+  | "CUSTOM_COMMAND"
+  | "AUTO_RESPONDER";
 
 type LogDashboardActionInput = {
   guildId: bigint;

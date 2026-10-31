@@ -8,12 +8,18 @@ const plans = [
     name: "Free",
     price: "£0",
     description: "Perfect for smaller communities getting started with Kaelix.",
+    lead: null,
     features: [
       "Up to 60 server members",
       "10 events/month",
       "3 activities",
       "1 preset Kaelix faction pack",
-      "Server notifications only",
+      "Leveling & XP",
+      "Moderation commands with case history",
+      "AutoMod: spam, mass mentions & invite links",
+      "Welcome & leave messages",
+      "2 active polls, 1 giveaway",
+      "Server notifications",
     ],
     activities: "Riddle, Would You Rather, True or False",
     button: "Add to Discord",
@@ -21,36 +27,47 @@ const plans = [
   },
   {
     name: "Core",
-    price: "£5.99/mo",
+    price: "£4.99/mo",
     description: "Built for active growing communities that need structure and engagement.",
+    lead: "Everything in Free, plus",
     features: [
       "Up to 200 server members",
       "30 events/month",
       "7 activities",
       "Custom factions up to 4",
+      "Welcome & goodbye image cards",
+      "Full AutoMod: banned words, links & auto-timeouts",
+      "2 custom commands & 2 auto-responders",
+      "Unlimited polls with multiple choice",
+      "5 giveaways with entry rules",
       "DM notifications",
       "Weekly server summary",
       "Achievement & activity alerts",
     ],
-    activities:
-      "Free + Quiz, Cipher, Hidden Word, Story Chain",
+    activities: "Free + Quiz, Cipher, Hidden Word, Story Chain",
     button: "Choose Core",
     highlight: false,
   },
   {
     name: "Pro",
-    price: "£20.99/mo",
+    price: "£18.99/mo",
     description: "Advanced systems for larger and highly active communities.",
+    lead: "Everything in Core, plus",
     features: [
       "Up to 1,000 server members",
       "100 events/month",
       "12 activities",
+      "Activity Autopilot: 10 scheduled games",
+      "Twitch, YouTube & Kick alerts (10)",
+      "Level role rewards, XP boosts & anti-farming",
+      "Faction Seasons with a Hall of Fame",
+      "Server insights: best times, retention & more",
+      "Unlimited custom commands with role actions",
+      "Unlimited giveaways, with points to enter",
       "Trivia: Faction activity battles",
-      "Analytics & progression systems",
-      "Expanded faction systems",
+      "Analytics & weekly digest",
     ],
-    activities:
-      "Core + Caption This, Meme War, GIF Battle, Two Truths and a Lie, Trivia",
+    activities: "Core + Caption This, Meme War, GIF Battle, Two Truths and a Lie, Trivia",
     button: "Choose Pro",
     highlight: true,
   },
@@ -58,14 +75,19 @@ const plans = [
     name: "Elite",
     price: "£48.99+/mo",
     description: "Enterprise-grade infrastructure for massive communities and networks.",
+    lead: "Everything in Pro, plus",
     features: [
-      "Unlimited server members",
-      "Unlimited events",
-      "Unlimited/custom factions",
+      "Unlimited members, events & factions",
+      "Cross-server networks & seasons",
+      "Live Network Trivia Night battles",
+      "Tournaments with knockout brackets",
+      "Custom game builder",
+      "Automations",
+      "Custom bot branding in your server",
+      "Unlimited Autopilot & stream alerts",
+      "Full custom activity shop",
       "Custom systems & integrations",
       "Priority/direct support",
-      "Custom branding",
-      "Full custom activity shop",
     ],
     activities:
       "Everything, including Hot Takes, Reflex Arena, Emoji Race, Speed Typing and Puzzle Drop",
@@ -127,6 +149,12 @@ export default function PricingPage() {
                     Included
                   </p>
 
+                  {plan.lead && (
+                    <p className="mb-3 text-sm font-semibold text-white">
+                      {plan.lead}
+                    </p>
+                  )}
+
                   <ul className="space-y-3 text-sm text-slate-200">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex gap-3">
@@ -171,7 +199,9 @@ export default function PricingPage() {
           </div>
 
           <p className="mx-auto mt-12 max-w-3xl text-center text-sm leading-7 text-slate-400">
-            Plans are bought and managed through Discord. You can also buy
+            Plans are bought and managed through Discord, and apply to the
+            whole server. Only server admins (members with Manage Server) can
+            buy a plan for a server. You can also buy
             from inside your server: add Kaelix, run{" "}
             <span className="font-semibold text-slate-200">/settings</span>,
             then open{" "}

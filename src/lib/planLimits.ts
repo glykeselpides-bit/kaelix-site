@@ -14,14 +14,81 @@ type Limits = {
   members: number;
   eventsPerMonth: number;
   customFactions: number;
+  customCommands: number;
+  autoResponders: number;
+  activePolls: number;
+  activeGiveaways: number;
+  autopilotSchedules: number;
+  streamAlerts: number;
 };
 
 export const PLAN_LIMITS: Record<PlanId, Limits> = {
-  FREE: { members: 60, eventsPerMonth: 10, customFactions: 0 },
-  CORE: { members: 200, eventsPerMonth: 30, customFactions: 4 },
-  PRO: { members: 1000, eventsPerMonth: 100, customFactions: 12 },
-  ELITE: { members: -1, eventsPerMonth: -1, customFactions: -1 },
+  FREE: {
+    members: 60, eventsPerMonth: 10, customFactions: 0, customCommands: 0, autoResponders: 0,
+    activePolls: 2, activeGiveaways: 1, autopilotSchedules: 0, streamAlerts: 0,
+  },
+  CORE: {
+    members: 200, eventsPerMonth: 30, customFactions: 4, customCommands: 2, autoResponders: 2,
+    activePolls: -1, activeGiveaways: 5, autopilotSchedules: 0, streamAlerts: 0,
+  },
+  PRO: {
+    members: 1000, eventsPerMonth: 100, customFactions: 12, customCommands: -1, autoResponders: -1,
+    activePolls: -1, activeGiveaways: -1, autopilotSchedules: 10, streamAlerts: 10,
+  },
+  ELITE: {
+    members: -1, eventsPerMonth: -1, customFactions: -1, customCommands: -1, autoResponders: -1,
+    activePolls: -1, activeGiveaways: -1, autopilotSchedules: -1, streamAlerts: -1,
+  },
 };
+
+export type LimitName = keyof Limits;
+
+const LIMIT_NAMES: Partial<Record<LimitName, string>> = {
+  autopilotSchedules: "Autopilot schedules",
+  streamAlerts: "stream alerts",
+  customCommands: "custom commands",
+  autoResponders: "auto-responders",
+};
+
+/** The cheapest plan whose limit is above `used` (null if none). */
+function nextPlanForLimit(limit: LimitName, used: number): string | null {
+  for (const plan of PLAN_ORDER) {
+    const value = PLAN_LIMITS[plan][limit];
+    if (value < 0 || value > used) {
+      return PLAN_NAMES[plan];
+    }
+  }
+  return null;
+}
+
+/** null if this server can add one more, otherwise the response to send back. */
+export async function checkLimitAllowed(
+  prisma: PrismaClient,
+  guildId: bigint,
+  limit: LimitName,
+  used: number
+): Promise<NextResponse | null> {
+  const { plan, planLabel } = await getServerPlan(prisma, guildId);
+  const value = (PLAN_LIMITS[plan] ?? PLAN_LIMITS.FREE)[limit];
+
+  if (value < 0 || used < value) {
+    return null;
+  }
+
+  const thing = LIMIT_NAMES[limit] ?? limit;
+  const next = nextPlanForLimit(limit, used);
+  return refuse(
+    value === 0
+      ? `${thing[0].toUpperCase()}${thing.slice(1)} aren't included in the ${planLabel} plan.${next ? ` They're included from ${next}.` : ""}`
+      : `This server is using ${used} of its ${value} ${thing} on the ${planLabel} plan.${next ? ` Upgrade to ${next} for more.` : ""}`
+  );
+}
+
+/** How many this server's plan allows (-1 = unlimited). */
+export async function getLimit(prisma: PrismaClient, guildId: bigint, limit: LimitName): Promise<number> {
+  const { plan } = await getServerPlan(prisma, guildId);
+  return (PLAN_LIMITS[plan] ?? PLAN_LIMITS.FREE)[limit];
+}
 
 /** The Kaelix preset faction pack. These don't count as custom factions. */
 export const PRESET_FACTION_KEYS = new Set(["VANGUARD", "CIPHER", "VEIL", "EMBER"]);
@@ -208,6 +275,12 @@ export function lowestPlanForGame(activityKey: string): string {
 const FEATURE_MIN_PLAN = {
   analytics: "PRO",
   weeklySummary: "CORE",
+  welcomeCards: "CORE",
+  automodAdvanced: "CORE",
+  advancedLeveling: "PRO",
+  insights: "PRO",
+  customGames: "ELITE",
+  customCommandRoles: "PRO",
 } as const satisfies Record<string, PlanId>;
 
 export type PlanFeature = keyof typeof FEATURE_MIN_PLAN;
@@ -215,6 +288,12 @@ export type PlanFeature = keyof typeof FEATURE_MIN_PLAN;
 const FEATURE_NAMES: Record<PlanFeature, string> = {
   analytics: "Analytics",
   weeklySummary: "Weekly server summary",
+  welcomeCards: "Welcome image cards",
+  automodAdvanced: "Banned words, link blocking and auto-timeouts",
+  advancedLeveling: "Level role rewards, XP boosts and anti-farming",
+  insights: "Server insights",
+  customGames: "Custom games",
+  customCommandRoles: "Custom command role actions",
 };
 
 export function planHasFeature(plan: PlanId, feature: PlanFeature): boolean {

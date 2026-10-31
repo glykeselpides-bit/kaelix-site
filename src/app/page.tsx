@@ -231,8 +231,8 @@ export default function Home() {
 
               <ul className="mt-6 space-y-3 text-sm text-slate-300">
                 <li>• Up to 60 members</li>
-                <li>• Events & onboarding</li>
-                <li>• Starter activities</li>
+                <li>• Events, leveling & starter activities</li>
+                <li>• Moderation, AutoMod & welcome messages</li>
               </ul>
             </div>
 
@@ -246,8 +246,8 @@ export default function Home() {
               </p>
 
               <ul className="mt-6 space-y-3 text-sm text-slate-300">
-                <li>• Weekly summaries</li>
-                <li>• DM notifications</li>
+                <li>• Welcome image cards & full AutoMod</li>
+                <li>• Weekly summaries & DM notifications</li>
                 <li>• Expanded activities</li>
               </ul>
             </div>
@@ -266,9 +266,9 @@ export default function Home() {
               </p>
 
               <ul className="mt-6 space-y-3 text-sm text-slate-300">
-                <li>• Analytics & progression</li>
+                <li>• Activity Autopilot & stream alerts</li>
+                <li>• Level rewards, Faction Seasons & insights</li>
                 <li>• Full activity library</li>
-                <li>• Advanced faction systems</li>
               </ul>
             </div>
           </div>
